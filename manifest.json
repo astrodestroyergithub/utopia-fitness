@@ -1,0 +1,9 @@
+{
+  "name": "Utopia Fitness — GPS Performance & Macro Nutrition",
+  "short_name": "UtopiaFitness",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#090D16",
+  "theme_color": "#CCFF00",
+  "description": "The ultimate fusion of Strava GPS telemetry, MyFitnessPal precision macro tracking, and biometric recovery."
+}

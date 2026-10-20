@@ -1,0 +1,2714 @@
+<!DOCTYPE html>
+<html lang="en" class="dark scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+  <title>Utopia Fitness — Reloaded GPS Performance, Macro Nutrition & Readiness Platform</title>
+  <meta name="description" content="Utopia Fitness unites Strava-grade GPS telemetry & segment leaderboards with MyFitnessPal precision macro tracking and real-time biometric recovery." />
+  <meta name="theme-color" content="#090D16" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
+          },
+          colors: {
+            utopia: {
+              bg: '#090D16',
+              card: '#111827',
+              elevated: '#1E293B',
+              lime: '#CCFF00',
+              strava: '#FC4C02',
+              mfp: '#0066EE',
+              cyan: '#00F0FF',
+              emerald: '#10B981',
+              rose: '#F43F5E',
+              amber: '#F59E0B'
+            }
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    :root {
+      color-scheme: dark;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      max-width: 100vw;
+      overflow-x: hidden;
+      background-color: #090D16;
+      color: #F8FAFC;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+    html.light-mode, html.light-mode body {
+      color-scheme: light;
+      background-color: #F1F5F9;
+      color: #0F172A;
+    }
+    html.light-mode .glass-panel {
+      background: rgba(255, 255, 255, 0.92);
+      border-color: rgba(148, 163, 184, 0.35);
+      color: #0F172A;
+      box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.06);
+    }
+    html.light-mode .sub-panel {
+      background: #F8FAFC;
+      border-color: #E2E8F0;
+      color: #0F172A;
+    }
+    html.light-mode .muted-text {
+      color: #475569 !important;
+    }
+    .glass-panel {
+      background: rgba(17, 24, 39, 0.86);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .sub-panel {
+      background: rgba(30, 41, 59, 0.55);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+    }
+    .neon-glow {
+      box-shadow: 0 0 25px -4px rgba(204, 255, 0, 0.35);
+    }
+    .strava-glow {
+      box-shadow: 0 0 25px -4px rgba(252, 76, 2, 0.4);
+    }
+    .mfp-glow {
+      box-shadow: 0 0 25px -4px rgba(0, 240, 255, 0.35);
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.4);
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(148, 163, 184, 0.3);
+      border-radius: 9999px;
+    }
+    .nav-btn-active {
+      background: linear-gradient(135deg, rgba(204, 255, 0, 0.18), rgba(0, 240, 255, 0.12));
+      border-color: rgba(204, 255, 0, 0.55);
+      color: #CCFF00;
+    }
+    html.light-mode .nav-btn-active {
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.9));
+      border-color: #0F172A;
+      color: #CCFF00;
+    }
+    @keyframes pulseRing {
+      0% { transform: scale(0.95); opacity: 0.8; }
+      50% { transform: scale(1.06); opacity: 0.4; }
+      100% { transform: scale(0.95); opacity: 0.8; }
+    }
+    .pulse-ring {
+      animation: pulseRing 2.4s infinite ease-in-out;
+    }
+    @keyframes scanLine {
+      0% { top: 8%; }
+      50% { top: 88%; }
+      100% { top: 8%; }
+    }
+    .scanner-beam {
+      position: absolute;
+      left: 6%;
+      right: 6%;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, #00F0FF, #CCFF00, transparent);
+      box-shadow: 0 0 12px #00F0FF;
+      animation: scanLine 1.8s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-utopia-lime selection:text-slate-950">
+
+  <!-- TOP ANNOUNCEMENT / NETLIFY LIVE TELEMETRY RIBBON -->
+  <div class="w-full bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 border-b border-white/10 px-3 sm:px-6 py-1.5 text-xs flex flex-wrap items-center justify-between gap-2 z-40">
+    <div class="flex items-center gap-2">
+      <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-utopia-lime/15 text-utopia-lime font-semibold border border-utopia-lime/30">
+        <span class="w-1.5 h-1.5 rounded-full bg-utopia-lime animate-ping"></span>
+        UTOPIA OS 4.8 LIVE
+      </span>
+      <span class="text-slate-300 hidden sm:inline">Strava GPS Engine + MyFitnessPal Metabolic Core + Biometric HRV Sync</span>
+    </div>
+    <div class="flex items-center gap-3 ml-auto">
+      <button id="unitToggleBtn" type="button" class="px-2.5 py-0.5 rounded bg-white/5 hover:bg-white/10 border border-white/10 text-slate-200 font-mono text-[11px] transition">
+        UNITS: <span id="unitLabel" class="text-utopia-cyan font-bold">METRIC (KM / KG)</span>
+      </button>
+      <button id="themeToggleBtn" type="button" class="px-2.5 py-0.5 rounded bg-white/5 hover:bg-white/10 border border-white/10 text-slate-200 text-[11px] transition" title="Toggle Dark/Light Theme">
+        <span id="themeLabel">☀️ Light</span>
+      </button>
+      <button id="exportDataBtn" type="button" class="px-2.5 py-0.5 rounded bg-utopia-lime/20 hover:bg-utopia-lime/30 border border-utopia-lime/40 text-utopia-lime font-semibold text-[11px] transition">
+        ⬇ Export JSON
+      </button>
+    </div>
+  </div>
+
+  <!-- MAIN APPLICATION SHELL -->
+  <div class="flex-1 flex flex-col lg:flex-row w-full max-w-[1600px] mx-auto relative">
+
+    <!-- DESKTOP LEFT COMMAND SIDEBAR -->
+    <aside class="hidden lg:flex lg:flex-col lg:w-64 xl:w-72 shrink-0 p-4 border-r border-white/10 sticky top-0 h-screen overflow-y-auto custom-scrollbar">
+      <!-- Brand Logo -->
+      <div class="flex items-center justify-between mb-6 px-2">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-utopia-lime via-utopia-cyan to-utopia-strava p-0.5 shadow-lg">
+            <div class="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center">
+              <svg class="w-6 h-6 text-utopia-lime" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+            </div>
+          </div>
+          <div>
+            <div class="font-black tracking-tight text-lg leading-none flex items-center gap-1">
+              <span>UTOPIA</span>
+              <span class="text-utopia-lime">FITNESS</span>
+            </div>
+            <span class="text-[11px] text-slate-400 font-mono">APEX TELEMETRY SUITE</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Athlete Quick Status Card -->
+      <div class="glass-panel rounded-2xl p-3.5 mb-5 border border-white/10">
+        <div class="flex items-center gap-3">
+          <div class="relative">
+            <div class="w-11 h-11 rounded-full bg-gradient-to-tr from-utopia-strava to-utopia-cyan flex items-center justify-center text-white font-extrabold text-sm">
+              AK
+            </div>
+            <span class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-400 border-2 border-slate-900 rounded-full" title="Biometric Strap Connected"></span>
+          </div>
+          <div class="min-w-0 flex-1">
+            <div class="flex items-center gap-1.5">
+              <p id="sidebarAthleteName" class="font-bold text-sm truncate">Aarav Mehta</p>
+              <span class="px-1.5 py-0.5 text-[10px] font-bold bg-utopia-strava/20 text-utopia-strava rounded">PRO</span>
+            </div>
+            <p class="text-xs text-slate-400 muted-text truncate">VO2 Max: <span class="text-utopia-cyan font-mono font-bold">61.4</span> • FTP: <span class="text-utopia-lime font-mono font-bold">315W</span></p>
+          </div>
+        </div>
+        <div class="grid grid-cols-3 gap-1.5 mt-3 pt-3 border-t border-white/10 text-center">
+          <div class="sub-panel rounded-lg p-1.5">
+            <div class="text-[10px] text-slate-400 muted-text">STREAK</div>
+            <div class="font-mono font-bold text-xs text-amber-400" id="sidebarStreak">28d 🔥</div>
+          </div>
+          <div class="sub-panel rounded-lg p-1.5">
+            <div class="text-[10px] text-slate-400 muted-text">READINESS</div>
+            <div class="font-mono font-bold text-xs text-emerald-400" id="sidebarReadiness">92%</div>
+          </div>
+          <div class="sub-panel rounded-lg p-1.5">
+            <div class="text-[10px] text-slate-400 muted-text">NET KCAL</div>
+            <div class="font-mono font-bold text-xs text-utopia-cyan" id="sidebarNetKcal">+640</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Primary Navigation -->
+      <div class="space-y-1.5 flex-1" role="navigation" aria-label="Main Navigation">
+        <div class="px-2 pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 muted-text">Core Modules</div>
+        <button type="button" data-tab="dashboard" class="nav-tab-btn nav-btn-active w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-semibold border border-transparent transition">
+          <span class="flex items-center gap-3">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+            Command Hub
+          </span>
+          <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white/10">LIVE</span>
+        </button>
+
+        <button type="button" data-tab="strava" class="nav-tab-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-semibold text-slate-300 hover:bg-white/5 border border-transparent transition">
+          <span class="flex items-center gap-3">
+            <svg class="w-4 h-4 text-utopia-strava" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
+            GPS & Strava Studio
+          </span>
+          <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-utopia-strava/20 text-utopia-strava">GPS</span>
+        </button>
+
+        <button type="button" data-tab="nutrition" class="nav-tab-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-semibold text-slate-300 hover:bg-white/5 border border-transparent transition">
+          <span class="flex items-center gap-3">
+            <svg class="w-4 h-4 text-utopia-cyan" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+            MyFitnessPal Lab
+          </span>
+          <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-utopia-cyan/20 text-utopia-cyan">KCAL</span>
+        </button>
+
+        <button type="button" data-tab="recovery" class="nav-tab-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-semibold text-slate-300 hover:bg-white/5 border border-transparent transition">
+          <span class="flex items-center gap-3">
+            <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+            Recovery & Muscle Map
+          </span>
+          <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400">HRV</span>
+        </button>
+
+        <button type="button" data-tab="community" class="nav-tab-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-semibold text-slate-300 hover:bg-white/5 border border-transparent transition">
+          <span class="flex items-center gap-3">
+            <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            Clubs, Feed & Kudos
+          </span>
+          <span id="feedBadgeCount" class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400">4</span>
+        </button>
+
+        <button type="button" data-tab="platform" class="nav-tab-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-semibold text-slate-300 hover:bg-white/5 border border-transparent transition">
+          <span class="flex items-center gap-3">
+            <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
+            Why Utopia & Plans
+          </span>
+          <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300">PRO</span>
+        </button>
+      </div>
+
+      <!-- Quick CTA Actions -->
+      <div class="mt-6 pt-4 border-t border-white/10 space-y-2">
+        <button id="openQuickWorkoutBtn" type="button" class="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-utopia-strava to-orange-500 hover:opacity-95 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg transition">
+          <span>⚡ Record / Log GPS Activity</span>
+        </button>
+        <button id="openQuickMealBtn" type="button" class="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-utopia-mfp to-utopia-cyan hover:opacity-95 text-slate-950 font-bold text-xs flex items-center justify-center gap-2 shadow-lg transition">
+          <span>🥗 Quick-Log Meal / Scan</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT COLUMN -->
+    <div class="flex-1 flex flex-col min-w-0 pb-24 lg:pb-12">
+
+      <!-- STICKY MOBILE / TABLET & DESKTOP HEADER BAR -->
+      <header class="sticky top-0 z-30 glass-panel border-b border-white/10 px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
+        <!-- Mobile Brand -->
+        <div class="flex items-center gap-2.5 lg:hidden">
+          <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-utopia-lime to-utopia-strava flex items-center justify-center text-slate-950 font-black">
+            U
+          </div>
+          <div>
+            <span class="font-black text-base tracking-tight">UTOPIA <span class="text-utopia-lime">FITNESS</span></span>
+          </div>
+        </div>
+
+        <!-- Desktop View Title & Live Sync Indicator -->
+        <div class="hidden lg:flex items-center gap-4">
+          <div>
+            <h1 id="activeViewTitle" class="text-lg font-extrabold tracking-tight">Athlete Command Hub</h1>
+            <p id="activeViewSubtitle" class="text-xs text-slate-400 muted-text">Unified Strava GPS Performance + MyFitnessPal Metabolic Equation</p>
+          </div>
+        </div>
+
+        <!-- Right Controls: Live Heart Rate Pill, Hydration Quick Pill, Profile Settings -->
+        <div class="flex items-center gap-2 sm:gap-3 ml-auto">
+          <!-- Simulated Live Biometric Stream Pill -->
+          <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl sub-panel text-xs">
+            <span class="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
+            <span class="text-slate-400 muted-text">LIVE HR:</span>
+            <span id="headerLiveHr" class="font-mono font-bold text-rose-400">64 BPM</span>
+          </div>
+
+          <!-- Quick Water Add Button -->
+          <button id="headerWaterBtn" type="button" class="px-3 py-1.5 rounded-xl sub-panel hover:border-utopia-cyan/50 text-xs font-semibold flex items-center gap-1.5 transition" title="Log +250ml Hydration">
+            <span>💧</span>
+            <span id="headerWaterLabel" class="font-mono font-bold text-utopia-cyan">2.25L</span>
+            <span class="text-[10px] text-utopia-lime font-bold">+250ml</span>
+          </button>
+
+          <!-- AI Coach Drawer Trigger -->
+          <button id="openAiCoachBtn" type="button" class="px-3 py-1.5 rounded-xl bg-utopia-lime/15 hover:bg-utopia-lime/25 border border-utopia-lime/40 text-utopia-lime text-xs font-bold flex items-center gap-1.5 transition">
+            <span>🧠</span>
+            <span class="hidden md:inline">Utopia AI Coach</span>
+          </button>
+
+          <!-- Edit Athlete Goals Button -->
+          <button id="openProfileModalBtn" type="button" class="p-2 rounded-xl sub-panel hover:border-white/30 text-slate-300 transition" title="Edit Athlete Profile & Targets">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          </button>
+        </div>
+      </header>
+
+      <!-- =================================================================== -->
+      <!-- VIEW 1: COMMAND HUB (UNIFIED DASHBOARD)                             -->
+      <!-- =================================================================== -->
+      <main id="view-dashboard" class="tab-view px-4 sm:px-6 pt-5 space-y-6">
+
+        <!-- HERO BANNER: THE UTOPIA FUSION EQUATION -->
+        <section class="glass-panel rounded-3xl p-5 sm:p-7 border border-white/10 relative overflow-hidden">
+          <div class="absolute -right-16 -top-16 w-72 h-72 bg-utopia-lime/10 rounded-full blur-3xl pointer-events-none"></div>
+          <div class="absolute -left-16 -bottom-16 w-72 h-72 bg-utopia-strava/10 rounded-full blur-3xl pointer-events-none"></div>
+
+          <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-6 relative z-10">
+            <div class="max-w-2xl space-y-2">
+              <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-semibold text-utopia-lime">
+                <span>⚡ THE WORLD'S MOST COMPLETE ATHLETE ECOSYSTEM</span>
+              </div>
+              <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight leading-tight">
+                Where <span class="text-utopia-strava">Strava Telemetry</span> Meets <span class="text-utopia-cyan">MyFitnessPal Precision</span>.
+              </h2>
+              <p class="text-sm text-slate-300 muted-text leading-relaxed">
+                Every meter climbed, watt pushed, and segment conquered dynamically recalibrates your daily caloric & macronutrient targets in real time.
+              </p>
+              <div class="flex flex-wrap items-center gap-2.5 pt-2">
+                <button type="button" onclick="switchTab('strava')" class="px-4 py-2 rounded-xl bg-utopia-strava hover:bg-orange-600 text-white font-bold text-xs flex items-center gap-2 shadow-lg transition">
+                  <span>🗺️ Open GPS Route Studio</span>
+                </button>
+                <button type="button" onclick="switchTab('nutrition')" class="px-4 py-2 rounded-xl bg-utopia-cyan hover:bg-cyan-400 text-slate-950 font-bold text-xs flex items-center gap-2 shadow-lg transition">
+                  <span>🥗 Open Macro & Barcode Lab</span>
+                </button>
+                <button type="button" onclick="switchTab('recovery')" class="px-3.5 py-2 rounded-xl sub-panel hover:border-utopia-lime/50 text-xs font-semibold transition">
+                  <span>🧬 Inspect Muscle Recovery Map</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Live Synced Metabolic Equation Widget -->
+            <div class="sub-panel rounded-2xl p-4 sm:p-5 border border-white/10 xl:min-w-[410px]">
+              <div class="flex items-center justify-between mb-3">
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-400 muted-text">Live Metabolic Energy Equation</span>
+                <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-mono text-[10px] font-bold">AUTO-SYNCED</span>
+              </div>
+              <div class="grid grid-cols-4 gap-2 items-center text-center">
+                <div class="p-2 rounded-xl bg-slate-900/60 border border-white/5">
+                  <div class="text-[10px] text-slate-400">BASE GOAL</div>
+                  <div id="eqBaseGoal" class="font-mono font-extrabold text-sm sm:text-base text-white mt-0.5">2,450</div>
+                  <div class="text-[10px] text-slate-500">kcal</div>
+                </div>
+                <div class="p-2 rounded-xl bg-utopia-strava/15 border border-utopia-strava/30">
+                  <div class="text-[10px] text-utopia-strava font-bold">+ STRAVA BURN</div>
+                  <div id="eqExerciseBurn" class="font-mono font-extrabold text-sm sm:text-base text-utopia-strava mt-0.5">+740</div>
+                  <div class="text-[10px] text-orange-300/70">kcal</div>
+                </div>
+                <div class="p-2 rounded-xl bg-utopia-cyan/15 border border-utopia-cyan/30">
+                  <div class="text-[10px] text-utopia-cyan font-bold">- MFP FOOD</div>
+                  <div id="eqFoodLogged" class="font-mono font-extrabold text-sm sm:text-base text-utopia-cyan mt-0.5">-2,550</div>
+                  <div class="text-[10px] text-cyan-300/70">kcal</div>
+                </div>
+                <div class="p-2 rounded-xl bg-utopia-lime/20 border border-utopia-lime/40">
+                  <div class="text-[10px] text-utopia-lime font-bold">REMAINING</div>
+                  <div id="eqNetRemaining" class="font-mono font-black text-base sm:text-lg text-utopia-lime mt-0.5">640</div>
+                  <div class="text-[10px] text-utopia-lime/80">kcal left</div>
+                </div>
+              </div>
+              <div class="mt-3 pt-3 border-t border-white/10 flex items-center justify-between text-xs">
+                <span class="text-slate-400 muted-text"> Caloric Burn Bonus unlocked from <strong id="eqWorkoutCount">2</strong> activities today</span>
+                <button type="button" onclick="switchTab('nutrition')" class="text-utopia-cyan hover:underline font-semibold">Fuel Now →</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 4 KEY TELEMETRY KPI CARDS -->
+        <section class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+          <!-- KPI 1: Weekly Distance & Elevation (Strava) -->
+          <div class="glass-panel rounded-2xl p-4 border border-white/10 flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-400 muted-text">Weekly GPS Volume</span>
+              <span class="px-2 py-0.5 rounded-full bg-utopia-strava/20 text-utopia-strava text-[11px] font-bold">STRAVA SYNC</span>
+            </div>
+            <div class="my-3 flex items-baseline justify-between">
+              <div>
+                <span id="kpiWeeklyDist" class="text-3xl font-black font-mono">84.6</span>
+                <span id="kpiWeeklyDistUnit" class="text-sm text-slate-400 font-semibold ml-1">km</span>
+              </div>
+              <div class="text-right">
+                <div class="text-xs text-emerald-400 font-bold">▲ +14.2% vs last wk</div>
+                <div class="text-[11px] text-slate-400 muted-text">Elev: <span id="kpiWeeklyElev" class="font-mono text-white">1,840 m</span></div>
+              </div>
+            </div>
+            <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+              <div id="kpiDistBar" class="bg-gradient-to-r from-utopia-strava to-amber-400 h-full rounded-full transition-all duration-500" style="width: 85%"></div>
+            </div>
+            <div class="flex justify-between text-[11px] text-slate-400 muted-text mt-1.5">
+              <span>Goal: <span id="kpiDistGoalText">100 km</span></span>
+              <span>6 Sessions</span>
+            </div>
+          </div>
+
+          <!-- KPI 2: Daily Macro Precision (MyFitnessPal) -->
+          <div class="glass-panel rounded-2xl p-4 border border-white/10 flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-400 muted-text">Macronutrient Split</span>
+              <span class="px-2 py-0.5 rounded-full bg-utopia-cyan/20 text-utopia-cyan text-[11px] font-bold">MFP ENGINE</span>
+            </div>
+            <div class="my-3 grid grid-cols-3 gap-2 text-center">
+              <div class="sub-panel rounded-xl p-2">
+                <div class="text-[10px] text-rose-400 font-bold">PROTEIN</div>
+                <div class="font-mono font-extrabold text-sm mt-0.5"><span id="kpiProCur">178</span>/<span id="kpiProGoal">190</span>g</div>
+              </div>
+              <div class="sub-panel rounded-xl p-2">
+                <div class="text-[10px] text-utopia-cyan font-bold">CARBS</div>
+                <div class="font-mono font-extrabold text-sm mt-0.5"><span id="kpiCarbCur">290</span>/<span id="kpiCarbGoal">340</span>g</div>
+              </div>
+              <div class="sub-panel rounded-xl p-2">
+                <div class="text-[10px] text-amber-400 font-bold">FATS</div>
+                <div class="font-mono font-extrabold text-sm mt-0.5"><span id="kpiFatCur">74</span>/<span id="kpiFatGoal">85</span>g</div>
+              </div>
+            </div>
+            <div class="flex items-center justify-between text-xs text-slate-400 muted-text">
+              <span>Micronutrient Score: <strong class="text-utopia-lime">94/100</strong></span>
+              <button type="button" onclick="switchTab('nutrition')" class="text-utopia-cyan font-semibold hover:underline">+ Add Food</button>
+            </div>
+          </div>
+
+          <!-- KPI 3: Biometric Readiness & HRV -->
+          <div class="glass-panel rounded-2xl p-4 border border-white/10 flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-400 muted-text">Autonomic Readiness</span>
+              <span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[11px] font-bold">PEAK STATE</span>
+            </div>
+            <div class="my-3 flex items-baseline justify-between">
+              <div>
+                <span id="kpiReadinessVal" class="text-3xl font-black font-mono text-emerald-400">92%</span>
+                <span class="text-xs text-slate-400 ml-1">HRV: <strong class="text-white font-mono">88 ms</strong></span>
+              </div>
+              <div class="text-right">
+                <div class="text-xs text-utopia-lime font-bold">RHR: 46 bpm</div>
+                <div class="text-[11px] text-slate-400 muted-text">Sleep: 8h 14m (96%)</div>
+              </div>
+            </div>
+            <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+              <div class="bg-gradient-to-r from-emerald-500 to-utopia-lime h-full rounded-full" style="width: 92%"></div>
+            </div>
+            <div class="flex justify-between text-[11px] text-slate-400 muted-text mt-1.5">
+              <span>Recommended Day Strain: <strong>16.5 - 18.5</strong></span>
+              <button type="button" onclick="switchTab('recovery')" class="text-emerald-400 font-semibold hover:underline">Details →</button>
+            </div>
+          </div>
+
+          <!-- KPI 4: Hydration & Electrolyte Balance -->
+          <div class="glass-panel rounded-2xl p-4 border border-white/10 flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-400 muted-text">Hydration & Sweat Loss</span>
+              <span class="px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400 text-[11px] font-bold">ELECTROLYTES</span>
+            </div>
+            <div class="my-3 flex items-baseline justify-between">
+              <div>
+                <span id="kpiWaterVal" class="text-3xl font-black font-mono text-utopia-cyan">2.25</span>
+                <span class="text-sm text-slate-400 font-semibold ml-1">/ 3.20 L</span>
+              </div>
+              <div class="flex items-center gap-1">
+                <button type="button" onclick="adjustWater(250)" class="px-2 py-1 rounded-lg bg-utopia-cyan/20 hover:bg-utopia-cyan/30 text-utopia-cyan font-mono font-bold text-xs transition">+250ml</button>
+                <button type="button" onclick="adjustWater(500)" class="px-2 py-1 rounded-lg bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 font-mono font-bold text-xs transition">+500ml</button>
+              </div>
+            </div>
+            <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+              <div id="kpiWaterBar" class="bg-gradient-to-r from-blue-500 to-utopia-cyan h-full rounded-full transition-all duration-300" style="width: 70%"></div>
+            </div>
+            <div class="flex justify-between text-[11px] text-slate-400 muted-text mt-1.5">
+              <span>Sweat Loss Adjusted: +450ml</span>
+              <button type="button" onclick="adjustWater(-250)" class="text-slate-400 hover:text-white">-250ml</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- CHARTS & INTERACTIVE ROUTE PREVIEW ROW -->
+        <section class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <!-- Chart 1: 7-Day Caloric Intake vs. Active Expenditure & Strain -->
+          <div class="lg:col-span-7 glass-panel rounded-2xl p-5 border border-white/10 flex flex-col">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+              <div>
+                <h3 class="font-bold text-base">7-Day Metabolic Flux & Training Load</h3>
+                <p class="text-xs text-slate-400 muted-text">MyFitnessPal Intake vs. Strava Active Burn + Cardiovascular Strain</p>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <button type="button" data-chartmode="calories" class="chart-mode-btn px-2.5 py-1 rounded-lg bg-utopia-lime text-slate-950 font-bold text-xs transition">Calories & Burn</button>
+                <button type="button" data-chartmode="strain" class="chart-mode-btn px-2.5 py-1 rounded-lg sub-panel text-slate-300 hover:text-white font-semibold text-xs transition">HRV vs Strain</button>
+              </div>
+            </div>
+            <div class="relative h-64 w-full">
+              <canvas id="dashboardFluxChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Latest GPS Activity Spotlight Card -->
+          <div class="lg:col-span-5 glass-panel rounded-2xl p-5 border border-white/10 flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-2">
+                <span class="w-8 h-8 rounded-lg bg-utopia-strava/20 text-utopia-strava flex items-center justify-center font-bold">🏃</span>
+                <div>
+                  <h3 id="spotlightRouteTitle" class="font-bold text-sm">Marina Bay Dawn Tempo 10K</h3>
+                  <p class="text-[11px] text-slate-400 muted-text">Today, 06:15 AM • Strava Verified GPS • 3 Segment PRs 🏆</p>
+                </div>
+              </div>
+              <button type="button" onclick="switchTab('strava')" class="px-2.5 py-1 rounded-lg bg-utopia-strava/20 text-utopia-strava hover:bg-utopia-strava/30 text-xs font-bold transition">
+                Full Telemetry →
+              </button>
+            </div>
+
+            <!-- Mini SVG Topographic Route Preview -->
+            <div class="sub-panel rounded-xl p-3 relative overflow-hidden h-36 flex items-center justify-center border border-white/10">
+              <svg viewBox="0 0 400 130" class="w-full h-full">
+                <defs>
+                  <linearGradient id="miniRouteGrad" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stop-color="#FC4C02" />
+                    <stop offset="50%" stop-color="#CCFF00" />
+                    <stop offset="100%" stop-color="#00F0FF" />
+                  </linearGradient>
+                </defs>
+                <g stroke="rgba(255,255,255,0.05)" stroke-width="1">
+                  <line x1="0" y1="30" x2="400" y2="30" />
+                  <line x1="0" y1="65" x2="400" y2="65" />
+                  <line x1="0" y1="100" x2="400" y2="100" />
+                  <line x1="100" y1="0" x2="100" y2="130" />
+                  <line x1="200" y1="0" x2="200" y2="130" />
+                  <line x1="300" y1="0" x2="300" y2="130" />
+                </g>
+                <path d="M 25 95 C 70 30, 115 110, 165 55 C 215 10, 260 95, 315 40 C 345 18, 370 70, 380 50" fill="none" stroke="url(#miniRouteGrad)" stroke-width="4" stroke-linecap="round" />
+                <circle cx="25" cy="95" r="5" fill="#10B981" />
+                <circle cx="165" cy="55" r="4.5" fill="#CCFF00" />
+                <circle cx="315" cy="40" r="4.5" fill="#FC4C02" />
+                <circle cx="380" cy="50" r="5.5" fill="#00F0FF" />
+              </svg>
+              <div class="absolute bottom-2 left-3 right-3 flex items-center justify-between text-[11px] font-mono bg-slate-950/75 px-2.5 py-1 rounded-lg border border-white/10">
+                <span>PACE: <strong class="text-utopia-lime">4:12 /km</strong></span>
+                <span>AVG HR: <strong class="text-rose-400">164 bpm</strong></span>
+                <span>POWER: <strong class="text-utopia-cyan">288 W</strong></span>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-3 gap-2 mt-3 text-center">
+              <div class="sub-panel rounded-lg p-2">
+                <div class="text-[10px] text-slate-400 muted-text">ACTIVE BURN</div>
+                <div class="font-mono font-bold text-sm text-utopia-strava">540 kcal</div>
+              </div>
+              <div class="sub-panel rounded-lg p-2">
+                <div class="text-[10px] text-slate-400 muted-text">SUFFER SCORE</div>
+                <div class="font-mono font-bold text-sm text-amber-400">112 (Tough)</div>
+              </div>
+              <div class="sub-panel rounded-lg p-2">
+                <div class="text-[10px] text-slate-400 muted-text">KUDOS EARNED</div>
+                <div class="font-mono font-bold text-sm text-utopia-lime">48 👍</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- RECENT LOGGED ACTIVITIES & TODAY'S MEAL SNAPSHOT -->
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Recent Workouts List -->
+          <div class="glass-panel rounded-2xl p-5 border border-white/10">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h3 class="font-bold text-base">Recent Strava & Training Sessions</h3>
+                <p class="text-xs text-slate-400 muted-text">Auto-credits exercise calories to your MyFitnessPal allowance</p>
+              </div>
+              <button type="button" id="dashAddWorkoutBtn" class="px-3 py-1.5 rounded-xl bg-utopia-strava/20 hover:bg-utopia-strava/30 text-utopia-strava font-bold text-xs transition">
+                + Log Workout
+              </button>
+            </div>
+            <div id="dashboardWorkoutList" class="space-y-2.5"></div>
+          </div>
+
+          <!-- Today's Nutrition Snapshot -->
+          <div class="glass-panel rounded-2xl p-5 border border-white/10">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h3 class="font-bold text-base">Today's MyFitnessPal Meal Log</h3>
+                <p class="text-xs text-slate-400 muted-text">Real-time macro & glycemic load distribution across meals</p>
+              </div>
+              <button type="button" onclick="switchTab('nutrition')" class="px-3 py-1.5 rounded-xl bg-utopia-cyan/20 hover:bg-utopia-cyan/30 text-utopia-cyan font-bold text-xs transition">
+                Open Diary →
+              </button>
+            </div>
+            <div id="dashboardMealSummary" class="space-y-2.5"></div>
+          </div>
+        </section>
+      </main>
+
+      <!-- =================================================================== -->
+      <!-- VIEW 2: STRAVA GPS & TELEMETRY STUDIO                               -->
+      <!-- =================================================================== -->
+      <main id="view-strava" class="tab-view hidden px-4 sm:px-6 pt-5 space-y-6">
+        <!-- Top Action & Route Selector Bar -->
+        <section class="glass-panel rounded-2xl p-4 sm:p-5 border border-white/10 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 rounded bg-utopia-strava text-white font-bold text-[10px]">STRAVA PRO ENGINE</span>
+              <h2 class="text-xl font-black">Interactive GPS Telemetry & Segment Lab</h2>
+            </div>
+            <p class="text-xs text-slate-400 muted-text mt-1">Scrub along the GPS elevation profile to inspect real-time gradient, wattage, pace, and heart rate zones.</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <label for="routeSelector" class="sr-only">Select GPS Route</label>
+            <select id="routeSelector" class="px-3 py-2 rounded-xl sub-panel text-xs font-bold border border-white/15 focus:outline-none focus:border-utopia-strava">
+              <option value="0">🏃 Marina Bay Dawn Tempo 10K (Run • 10.2 km)</option>
+              <option value="1">🚴 Alpe d'Utopia Summit Climb (Ride • 42.8 km)</option>
+              <option value="2">⛰️ Victoria Peak Skyrace Trail (Trail • 21.4 km)</option>
+              <option value="3">🏊 Sentosa Open-Water Tri Loop (Swim/Brick • 5.6 km)</option>
+            </select>
+            <button id="toggleLiveRecorderBtn" type="button" class="px-4 py-2 rounded-xl bg-utopia-strava hover:bg-orange-600 text-white font-bold text-xs flex items-center gap-1.5 shadow-lg transition">
+              <span>● Start Live GPS Simulator</span>
+            </button>
+          </div>
+        </section>
+
+        <!-- LIVE GPS WORKOUT SIMULATOR DRAWER (HIDDEN BY DEFAULT UNTIL TOGGLED OR ACTIVE) -->
+        <section id="liveRecorderPanel" class="hidden glass-panel rounded-2xl p-5 border-2 border-utopia-strava/60 strava-glow">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-utopia-strava/20 text-utopia-strava flex items-center justify-center font-black animate-pulse">
+                REC
+              </div>
+              <div>
+                <h3 class="font-black text-base text-white">Live GPS Telemetry Recorder</h3>
+                <p class="text-xs text-slate-300">Simulating real-time satellite lock, cadence, heart rate, and dynamic metabolic burn</p>
+              </div>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+              <select id="liveSportType" class="px-3 py-1.5 rounded-lg sub-panel text-xs font-bold">
+                <option value="Run">🏃 Road Run</option>
+                <option value="Ride">🚴 Cycling Ride</option>
+                <option value="Trail">⛰️ Trail Ultra</option>
+                <option value="HIIT">🔥 Metcon HIIT</option>
+              </select>
+              <button id="liveStartPauseBtn" type="button" class="px-4 py-1.5 rounded-lg bg-utopia-lime text-slate-950 font-extrabold text-xs">START</button>
+              <button id="liveLapBtn" type="button" class="px-3 py-1.5 rounded-lg sub-panel text-xs font-bold hover:border-white/30">LAP</button>
+              <button id="liveFinishSaveBtn" type="button" class="px-4 py-1.5 rounded-lg bg-emerald-500 text-slate-950 font-extrabold text-xs">SAVE & SYNC TO MFP</button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 mt-4 text-center">
+            <div class="sub-panel rounded-xl p-3">
+              <div class="text-[10px] text-slate-400">ELAPSED TIME</div>
+              <div id="liveTimerDisplay" class="font-mono font-black text-xl text-white mt-0.5">00:00:00</div>
+            </div>
+            <div class="sub-panel rounded-xl p-3">
+              <div class="text-[10px] text-slate-400">DISTANCE</div>
+              <div id="liveDistDisplay" class="font-mono font-black text-xl text-utopia-lime mt-0.5">0.00 km</div>
+            </div>
+            <div class="sub-panel rounded-xl p-3">
+              <div class="text-[10px] text-slate-400">CURRENT PACE</div>
+              <div id="livePaceDisplay" class="font-mono font-black text-xl text-utopia-cyan mt-0.5">4:18 /km</div>
+            </div>
+            <div class="sub-panel rounded-xl p-3">
+              <div class="text-[10px] text-slate-400">HEART RATE</div>
+              <div id="liveHrDisplay" class="font-mono font-black text-xl text-rose-400 mt-0.5">142 bpm</div>
+            </div>
+            <div class="sub-panel rounded-xl p-3 col-span-2 sm:col-span-1">
+              <div class="text-[10px] text-slate-400">ACTIVE KCAL</div>
+              <div id="liveKcalDisplay" class="font-mono font-black text-xl text-utopia-strava mt-0.5">0 kcal</div>
+            </div>
+          </div>
+          <div id="liveLapsContainer" class="mt-3 text-xs font-mono text-slate-300 space-y-1"></div>
+        </section>
+
+        <!-- INTERACTIVE GPS MAP CANVAS & TELEMETRY SCRUBBER -->
+        <section class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div class="lg:col-span-8 glass-panel rounded-2xl p-4 sm:p-5 border border-white/10 flex flex-col">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+              <div>
+                <h3 id="stravaMapTitle" class="font-bold text-base">Marina Bay Dawn Tempo 10K</h3>
+                <p id="stravaMapMeta" class="text-xs text-slate-400 muted-text">10.2 km • 142m Elev Gain • Normalized Power: 288W</p>
+              </div>
+              <div class="flex items-center gap-2 text-xs font-mono">
+                <span class="px-2 py-1 rounded bg-utopia-strava/20 text-utopia-strava">KOM / CR: 3 Segments</span>
+              </div>
+            </div>
+
+            <!-- Interactive HTML5 Canvas for GPS Map + Elevation Profile -->
+            <div class="relative w-full h-72 sm:h-80 rounded-xl overflow-hidden bg-slate-950 border border-white/10">
+              <canvas id="gpsTelemetryCanvas" class="w-full h-full block cursor-crosshair"></canvas>
+            </div>
+
+            <!-- Interactive Scrubber Slider -->
+            <div class="mt-4 space-y-2">
+              <div class="flex items-center justify-between text-xs">
+                <span class="text-slate-400 muted-text font-semibold">Scrub Route Telemetry Checkpoint (<span id="scrubPctLabel">45%</span>)</span>
+                <span id="scrubCoordLabel" class="font-mono text-utopia-cyan">1.2834° N, 103.8607° E</span>
+              </div>
+              <input id="routeScrubber" type="range" min="0" max="100" value="45" class="w-full accent-utopia-strava cursor-pointer" />
+            </div>
+
+            <!-- Instant Telemetry Readout at Scrubber Point -->
+            <div class="grid grid-cols-2 sm:grid-cols-5 gap-2.5 mt-3 text-center">
+              <div class="sub-panel rounded-xl p-2.5">
+                <div class="text-[10px] text-slate-400 muted-text">SPLIT DIST</div>
+                <div id="scrubDist" class="font-mono font-bold text-sm text-white">4.59 km</div>
+              </div>
+              <div class="sub-panel rounded-xl p-2.5">
+                <div class="text-[10px] text-slate-400 muted-text">ELEVATION</div>
+                <div id="scrubElev" class="font-mono font-bold text-sm text-utopia-lime">68 m</div>
+              </div>
+              <div class="sub-panel rounded-xl p-2.5">
+                <div class="text-[10px] text-slate-400 muted-text">GRADE</div>
+                <div id="scrubGrade" class="font-mono font-bold text-sm text-amber-400">+3.8%</div>
+              </div>
+              <div class="sub-panel rounded-xl p-2.5">
+                <div class="text-[10px] text-slate-400 muted-text">HEART RATE</div>
+                <div id="scrubHr" class="font-mono font-bold text-sm text-rose-400">168 bpm</div>
+              </div>
+              <div class="sub-panel rounded-xl p-2.5 col-span-2 sm:col-span-1">
+                <div class="text-[10px] text-slate-400 muted-text">OUTPUT</div>
+                <div id="scrubPower" class="font-mono font-bold text-sm text-utopia-cyan">296 W</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Heart Rate Zones & Power Distribution + Gear Tracker -->
+          <div class="lg:col-span-4 space-y-6">
+            <div class="glass-panel rounded-2xl p-5 border border-white/10">
+              <h3 class="font-bold text-sm mb-3">Heart Rate Zone Distribution</h3>
+              <div class="space-y-2.5 text-xs">
+                <div>
+                  <div class="flex justify-between mb-1"><span class="text-rose-400 font-bold">Z5 Anaerobic (&gt;178 bpm)</span><span class="font-mono">14% (6:02)</span></div>
+                  <div class="w-full bg-slate-800 h-2 rounded-full"><div class="bg-rose-500 h-full rounded-full" style="width:14%"></div></div>
+                </div>
+                <div>
+                  <div class="flex justify-between mb-1"><span class="text-orange-400 font-bold">Z4 Threshold (162-177 bpm)</span><span class="font-mono">48% (20:38)</span></div>
+                  <div class="w-full bg-slate-800 h-2 rounded-full"><div class="bg-orange-500 h-full rounded-full" style="width:48%"></div></div>
+                </div>
+                <div>
+                  <div class="flex justify-between mb-1"><span class="text-amber-300 font-bold">Z3 Tempo (146-161 bpm)</span><span class="font-mono">26% (11:10)</span></div>
+                  <div class="w-full bg-slate-800 h-2 rounded-full"><div class="bg-amber-400 h-full rounded-full" style="width:26%"></div></div>
+                </div>
+                <div>
+                  <div class="flex justify-between mb-1"><span class="text-emerald-400 font-bold">Z2 Endurance (130-145 bpm)</span><span class="font-mono">12% (5:09)</span></div>
+                  <div class="w-full bg-slate-800 h-2 rounded-full"><div class="bg-emerald-400 h-full rounded-full" style="width:12%"></div></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Active Gear Lifespan Tracker -->
+            <div class="glass-panel rounded-2xl p-5 border border-white/10">
+              <div class="flex items-center justify-between mb-3">
+                <h3 class="font-bold text-sm">Strava Gear Locker</h3>
+                <span class="text-[11px] text-utopia-lime font-mono">WEAR MONITOR</span>
+              </div>
+              <div class="space-y-3 text-xs">
+                <div class="sub-panel rounded-xl p-3">
+                  <div class="flex justify-between font-bold">
+                    <span>👟 Nike Alphafly 3 Proto</span>
+                    <span class="font-mono text-utopia-lime">312 / 500 km</span>
+                  </div>
+                  <div class="w-full bg-slate-800 h-1.5 rounded-full mt-2">
+                    <div class="bg-utopia-lime h-full rounded-full" style="width:62%"></div>
+                  </div>
+                </div>
+                <div class="sub-panel rounded-xl p-3">
+                  <div class="flex justify-between font-bold">
+                    <span>🚲 Specialized S-Works Tarmac SL8</span>
+                    <span class="font-mono text-utopia-cyan">2,840 km</span>
+                  </div>
+                  <div class="text-[11px] text-slate-400 muted-text mt-1">Chain wax service due in 160 km</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- STRAVA SEGMENT LEADERBOARD TABLE -->
+        <section class="glass-panel rounded-2xl p-5 border border-white/10">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+            <div>
+              <h3 class="font-bold text-base">Verified Segment Leaderboards (KOM / QOM / CR)</h3>
+              <p class="text-xs text-slate-400 muted-text">Compare your segment efforts against Club leaders and Personal Records</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button type="button" data-segfilter="all" class="seg-filter-btn px-3 py-1 rounded-lg bg-utopia-strava text-white text-xs font-bold">All Segments</button>
+              <button type="button" data-segfilter="Run" class="seg-filter-btn px-3 py-1 rounded-lg sub-panel text-xs font-semibold">Running</button>
+              <button type="button" data-segfilter="Ride" class="seg-filter-btn px-3 py-1 rounded-lg sub-panel text-xs font-semibold">Cycling</button>
+            </div>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs sm:text-sm">
+              <thead>
+                <tr class="border-b border-white/10 text-[11px] uppercase text-slate-400 muted-text">
+                  <th class="py-2.5 px-3">Segment Name</th>
+                  <th class="py-2.5 px-3">Discipline</th>
+                  <th class="py-2.5 px-3 text-right">Dist / Grade</th>
+                  <th class="py-2.5 px-3 text-right">Your PR</th>
+                  <th class="py-2.5 px-3 text-right">Power / Pace</th>
+                  <th class="py-2.5 px-3 text-right">Standing</th>
+                </tr>
+              </thead>
+              <tbody id="segmentTableBody" class="divide-y divide-white/5 font-mono text-xs"></tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+
+      <!-- =================================================================== -->
+      <!-- VIEW 3: MYFITNESSPAL PRECISION NUTRITION LAB                        -->
+      <!-- =================================================================== -->
+      <main id="view-nutrition" class="tab-view hidden px-4 sm:px-6 pt-5 space-y-6">
+        <!-- Top Macro Command Bar -->
+        <section class="glass-panel rounded-2xl p-5 border border-white/10">
+          <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded bg-utopia-cyan text-slate-950 font-extrabold text-[10px]">MYFITNESSPAL PRO LAB</span>
+                <h2 class="text-xl font-black">Precision Macro, Micro & Barcode Nutrition Engine</h2>
+              </div>
+              <p class="text-xs text-slate-400 muted-text mt-1">Workout calories from Strava automatically expand your daily fuel target.</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+              <label for="macroPresetSelect" class="text-xs text-slate-400 font-semibold">Macro Split Preset:</label>
+              <select id="macroPresetSelect" class="px-3 py-2 rounded-xl sub-panel text-xs font-bold border border-white/15">
+                <option value="endurance">🏃 Endurance Athlete (50C / 25P / 25F)</option>
+                <option value="hypertrophy">💪 Lean Hypertrophy (40C / 35P / 25F)</option>
+                <option value="metabolic">⚡ Low-Carb Metabolic (20C / 40P / 40F)</option>
+              </select>
+              <button id="openScannerModalBtn" type="button" class="px-4 py-2 rounded-xl bg-gradient-to-r from-utopia-cyan to-emerald-400 text-slate-950 font-extrabold text-xs flex items-center gap-1.5 shadow-lg transition">
+                <span>📷 Simulate Barcode Scanner</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Macro Progress Bars + Micronutrient Pills -->
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-5">
+            <div class="sub-panel rounded-xl p-3.5">
+              <div class="flex justify-between text-xs font-bold">
+                <span class="text-utopia-lime">NET CALORIES</span>
+                <span id="nutKcalText" class="font-mono">2,550 / 3,190 kcal</span>
+              </div>
+              <div class="w-full bg-slate-800 h-2.5 rounded-full mt-2 overflow-hidden">
+                <div id="nutKcalBar" class="bg-utopia-lime h-full rounded-full transition-all duration-300" style="width:80%"></div>
+              </div>
+              <p class="text-[11px] text-slate-400 muted-text mt-1.5">Includes <strong id="nutBonusBurnText" class="text-utopia-strava">+740 kcal</strong> Strava burn</p>
+            </div>
+
+            <div class="sub-panel rounded-xl p-3.5">
+              <div class="flex justify-between text-xs font-bold">
+                <span class="text-rose-400">PROTEIN (30%)</span>
+                <span id="nutProText" class="font-mono">178 / 190 g</span>
+              </div>
+              <div class="w-full bg-slate-800 h-2.5 rounded-full mt-2 overflow-hidden">
+                <div id="nutProBar" class="bg-rose-500 h-full rounded-full transition-all duration-300" style="width:93%"></div>
+              </div>
+              <p class="text-[11px] text-slate-400 muted-text mt-1.5">2.4g per kg bodyweight</p>
+            </div>
+
+            <div class="sub-panel rounded-xl p-3.5">
+              <div class="flex justify-between text-xs font-bold">
+                <span class="text-utopia-cyan">CARBOHYDRATES (45%)</span>
+                <span id="nutCarbText" class="font-mono">290 / 340 g</span>
+              </div>
+              <div class="w-full bg-slate-800 h-2.5 rounded-full mt-2 overflow-hidden">
+                <div id="nutCarbBar" class="bg-utopia-cyan h-full rounded-full transition-all duration-300" style="width:85%"></div>
+              </div>
+              <p class="text-[11px] text-slate-400 muted-text mt-1.5">Glycogen replenishment window open</p>
+            </div>
+
+            <div class="sub-panel rounded-xl p-3.5">
+              <div class="flex justify-between text-xs font-bold">
+                <span class="text-amber-400">HEALTHY FATS (25%)</span>
+                <span id="nutFatText" class="font-mono">74 / 85 g</span>
+              </div>
+              <div class="w-full bg-slate-800 h-2.5 rounded-full mt-2 overflow-hidden">
+                <div id="nutFatBar" class="bg-amber-400 h-full rounded-full transition-all duration-300" style="width:87%"></div>
+              </div>
+              <p class="text-[11px] text-slate-400 muted-text mt-1.5">Omega-3 index optimal</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- FOOD SEARCH & INSTANT ADD + MEAL DIARY SLOTS -->
+        <section class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <!-- Left: Verified Food Database Search & Custom Entry -->
+          <div class="lg:col-span-5 space-y-6">
+            <div class="glass-panel rounded-2xl p-5 border border-white/10">
+              <h3 class="font-bold text-base mb-1">Verified Athlete Food Database</h3>
+              <p class="text-xs text-slate-400 muted-text mb-3">Search foods or click any item to log to your selected meal slot</p>
+
+              <div class="flex gap-2 mb-3">
+                <select id="targetMealSlot" class="px-3 py-2 rounded-xl sub-panel text-xs font-bold border border-white/15">
+                  <option value="Breakfast">🌅 Breakfast</option>
+                  <option value="Lunch">☀️ Lunch</option>
+                  <option value="Dinner">🌙 Dinner</option>
+                  <option value="Snacks">⚡ Fuel & Snacks</option>
+                </select>
+                <input id="foodSearchInput" type="text" placeholder="Search chicken, oats, Maurten, salmon..." class="flex-1 px-3 py-2 rounded-xl sub-panel text-xs border border-white/15 focus:outline-none focus:border-utopia-cyan" />
+              </div>
+
+              <div id="foodDatabaseList" class="space-y-2 max-h-72 overflow-y-auto custom-scrollbar pr-1"></div>
+            </div>
+
+            <!-- Custom Food Quick Builder -->
+            <div class="glass-panel rounded-2xl p-5 border border-white/10">
+              <h3 class="font-bold text-sm mb-3">Custom Food / Macro Entry</h3>
+              <form id="customFoodForm" class="space-y-3 text-xs">
+                <div class="grid grid-cols-2 gap-2.5">
+                  <div>
+                    <label class="block text-slate-400 mb-1">Food / Meal Name</label>
+                    <input id="customFoodName" type="text" required placeholder="e.g. Post-Run Smoothie" class="w-full px-3 py-2 rounded-lg sub-panel border border-white/15" />
+                  </div>
+                  <div>
+                    <label class="block text-slate-400 mb-1">Meal Slot</label>
+                    <select id="customFoodSlot" class="w-full px-3 py-2 rounded-lg sub-panel border border-white/15 font-semibold">
+                      <option value="Breakfast">Breakfast</option>
+                      <option value="Lunch">Lunch</option>
+                      <option value="Dinner">Dinner</option>
+                      <option value="Snacks">Fuel & Snacks</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="grid grid-cols-4 gap-2">
+                  <div>
+                    <label class="block text-slate-400 mb-1">Kcal</label>
+                    <input id="customFoodKcal" type="number" min="0" max="5000" required value="320" class="w-full px-2.5 py-2 rounded-lg sub-panel font-mono" />
+                  </div>
+                  <div>
+                    <label class="block text-rose-400 mb-1">Protein(g)</label>
+                    <input id="customFoodPro" type="number" min="0" max="300" required value="28" class="w-full px-2.5 py-2 rounded-lg sub-panel font-mono" />
+                  </div>
+                  <div>
+                    <label class="block text-utopia-cyan mb-1">Carbs(g)</label>
+                    <input id="customFoodCarb" type="number" min="0" max="500" required value="36" class="w-full px-2.5 py-2 rounded-lg sub-panel font-mono" />
+                  </div>
+                  <div>
+                    <label class="block text-amber-400 mb-1">Fat(g)</label>
+                    <input id="customFoodFat" type="number" min="0" max="200" required value="7" class="w-full px-2.5 py-2 rounded-lg sub-panel font-mono" />
+                  </div>
+                </div>
+                <button type="submit" class="w-full py-2.5 rounded-xl bg-utopia-cyan hover:bg-cyan-400 text-slate-950 font-extrabold text-xs transition">
+                  + Log Custom Food to Diary
+                </button>
+              </form>
+            </div>
+          </div>
+
+          <!-- Right: Interactive Meal Diary Breakdown + Micronutrient Radar -->
+          <div class="lg:col-span-7 space-y-6">
+            <div class="glass-panel rounded-2xl p-5 border border-white/10">
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="font-bold text-base">Interactive Daily Meal Diary</h3>
+                <span class="text-xs text-slate-400 muted-text">Click trash icon on any item to remove & recalculate</span>
+              </div>
+              <div id="mealDiaryContainer" class="space-y-4"></div>
+            </div>
+
+            <!-- Micronutrient & Metabolic Biomarkers Bar -->
+            <div class="glass-panel rounded-2xl p-5 border border-white/10">
+              <h3 class="font-bold text-sm mb-3">Micronutrient & Electrolyte Saturation</h3>
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center text-xs">
+                <div class="sub-panel rounded-xl p-3">
+                  <div class="text-slate-400 muted-text">DIETARY FIBER</div>
+                  <div class="font-mono font-bold text-base text-emerald-400 mt-1">34 / 38 g</div>
+                  <div class="text-[10px] text-emerald-300">89% Optimal</div>
+                </div>
+                <div class="sub-panel rounded-xl p-3">
+                  <div class="text-slate-400 muted-text">SODIUM (SWEAT ADJ)</div>
+                  <div class="font-mono font-bold text-base text-utopia-cyan mt-1">2,180 mg</div>
+                  <div class="text-[10px] text-cyan-300">Balanced</div>
+                </div>
+                <div class="sub-panel rounded-xl p-3">
+                  <div class="text-slate-400 muted-text">POTASSIUM</div>
+                  <div class="font-mono font-bold text-base text-utopia-lime mt-1">3,640 mg</div>
+                  <div class="text-[10px] text-lime-300">94% Target</div>
+                </div>
+                <div class="sub-panel rounded-xl p-3">
+                  <div class="text-slate-400 muted-text">IRON & FERRITIN</div>
+                  <div class="font-mono font-bold text-base text-amber-400 mt-1">18.4 mg</div>
+                  <div class="text-[10px] text-amber-300">102% Target</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <!-- =================================================================== -->
+      <!-- VIEW 4: RECOVERY, BIOMETRICS & INTERACTIVE MUSCLE MAP               -->
+      <!-- =================================================================== -->
+      <main id="view-recovery" class="tab-view hidden px-4 sm:px-6 pt-5 space-y-6">
+        <section class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <!-- Interactive SVG Anatomical Muscle Fatigue & Recovery Selector -->
+          <div class="lg:col-span-6 glass-panel rounded-2xl p-5 border border-white/10">
+            <div class="flex items-center justify-between mb-3">
+              <div>
+                <h2 class="font-bold text-base">Interactive Muscle Fatigue & Recovery Map</h2>
+                <p class="text-xs text-slate-400 muted-text">Click any muscle group on the body diagram to inspect localized recovery & mobility protocols</p>
+              </div>
+              <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-mono text-[11px] font-bold">BIO-SCAN</span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center mt-4">
+              <!-- Clickable Anatomical Vector Diagram -->
+              <div class="sub-panel rounded-2xl p-4 flex flex-col items-center justify-center">
+                <svg viewBox="0 0 220 300" class="w-48 h-64 select-none">
+                  <!-- Head -->
+                  <circle cx="110" cy="30" r="18" fill="#334155" stroke="#94A3B8" stroke-width="1.5" />
+                  <!-- Shoulders / Delts -->
+                  <rect data-muscle="shoulders" class="muscle-node cursor-pointer hover:opacity-80 transition" x="56" y="55" width="24" height="32" rx="10" fill="#10B981" stroke="#fff" stroke-width="1.5" />
+                  <rect data-muscle="shoulders" class="muscle-node cursor-pointer hover:opacity-80 transition" x="140" y="55" width="24" height="32" rx="10" fill="#10B981" stroke="#fff" stroke-width="1.5" />
+                  <!-- Chest / Pecs -->
+                  <rect data-muscle="chest" class="muscle-node cursor-pointer hover:opacity-80 transition" x="82" y="55" width="56" height="36" rx="8" fill="#10B981" stroke="#fff" stroke-width="1.5" />
+                  <!-- Core / Abs -->
+                  <rect data-muscle="core" class="muscle-node cursor-pointer hover:opacity-80 transition" x="86" y="95" width="48" height="52" rx="8" fill="#00F0FF" stroke="#fff" stroke-width="1.5" />
+                  <!-- Arms -->
+                  <rect data-muscle="arms" class="muscle-node cursor-pointer hover:opacity-80 transition" x="52" y="92" width="20" height="58" rx="8" fill="#10B981" stroke="#fff" stroke-width="1.5" />
+                  <rect data-muscle="arms" class="muscle-node cursor-pointer hover:opacity-80 transition" x="148" y="92" width="20" height="58" rx="8" fill="#10B981" stroke="#fff" stroke-width="1.5" />
+                  <!-- Quads / Glutes -->
+                  <rect data-muscle="quads" class="muscle-node cursor-pointer hover:opacity-80 transition" x="82" y="152" width="25" height="68" rx="10" fill="#F59E0B" stroke="#fff" stroke-width="2" />
+                  <rect data-muscle="quads" class="muscle-node cursor-pointer hover:opacity-80 transition" x="113" y="152" width="25" height="68" rx="10" fill="#F59E0B" stroke="#fff" stroke-width="2" />
+                  <!-- Calves / Achillles -->
+                  <rect data-muscle="calves" class="muscle-node cursor-pointer hover:opacity-80 transition" x="84" y="226" width="21" height="56" rx="8" fill="#F43F5E" stroke="#fff" stroke-width="2" />
+                  <rect data-muscle="calves" class="muscle-node cursor-pointer hover:opacity-80 transition" x="115" y="226" width="21" height="56" rx="8" fill="#F43F5E" stroke="#fff" stroke-width="2" />
+                </svg>
+                <div class="flex items-center gap-3 text-[10px] font-mono mt-2">
+                  <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>Fresh (&gt;85%)</span>
+                  <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>Loaded</span>
+                  <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>Fatigued</span>
+                </div>
+              </div>
+
+              <!-- Selected Muscle Detail Panel -->
+              <div class="space-y-3">
+                <div class="sub-panel rounded-2xl p-4 border border-white/10">
+                  <div class="text-[10px] font-mono uppercase text-utopia-lime">SELECTED MUSCLE GROUP</div>
+                  <h3 id="muscleTitle" class="text-lg font-black mt-0.5">Gastrocnemius & Soleus (Calves)</h3>
+                  <div class="flex items-center gap-2 mt-2">
+                    <span class="text-xs text-slate-400">Recovery Status:</span>
+                    <span id="muscleScoreBadge" class="px-2 py-0.5 rounded bg-rose-500/20 text-rose-400 font-mono font-bold text-xs">62% (High Eccentric Load)</span>
+                  </div>
+                  <p id="muscleStrainSource" class="text-xs text-slate-300 mt-2.5 leading-relaxed">
+                    Primary strain driver: <strong>Marina Bay Dawn Tempo 10K</strong> (forefoot strike cadence 184 spm).
+                  </p>
+                  <div class="mt-3 pt-3 border-t border-white/10">
+                    <div class="text-[11px] font-bold text-utopia-cyan">Recommended Recovery Protocol:</div>
+                    <p id="muscleProtocol" class="text-xs text-slate-300 mt-1">12 min pneumatic compression boots + eccentric calf lowers (3x15) + 400mg Magnesium Glycinate before sleep.</p>
+                  </div>
+                </div>
+
+                <!-- Muscle Quick Buttons -->
+                <div class="flex flex-wrap gap-1.5">
+                  <button type="button" onclick="selectMuscle('calves')" class="px-2.5 py-1 rounded-lg sub-panel text-xs font-semibold hover:border-utopia-lime">Calves (62%)</button>
+                  <button type="button" onclick="selectMuscle('quads')" class="px-2.5 py-1 rounded-lg sub-panel text-xs font-semibold hover:border-utopia-lime">Quads (74%)</button>
+                  <button type="button" onclick="selectMuscle('core')" class="px-2.5 py-1 rounded-lg sub-panel text-xs font-semibold hover:border-utopia-lime">Core (88%)</button>
+                  <button type="button" onclick="selectMuscle('chest')" class="px-2.5 py-1 rounded-lg sub-panel text-xs font-semibold hover:border-utopia-lime">Chest (95%)</button>
+                  <button type="button" onclick="selectMuscle('shoulders')" class="px-2.5 py-1 rounded-lg sub-panel text-xs font-semibold hover:border-utopia-lime">Shoulders (93%)</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sleep Architecture & 1RM / FTP Performance Calculator -->
+          <div class="lg:col-span-6 space-y-6">
+            <!-- Sleep Stages Chart -->
+            <div class="glass-panel rounded-2xl p-5 border border-white/10">
+              <div class="flex items-center justify-between mb-3">
+                <div>
+                  <h3 class="font-bold text-base">Last Night's Sleep Architecture & HRV</h3>
+                  <p class="text-xs text-slate-400 muted-text">8h 14m Time Asleep • 96% Sleep Efficiency • +11% Deep Slow-Wave</p>
+                </div>
+                <span class="font-mono font-bold text-sm text-utopia-cyan">88 ms HRV</span>
+              </div>
+              <div class="relative h-48 w-full">
+                <canvas id="sleepStageChart"></canvas>
+              </div>
+            </div>
+
+            <!-- Interactive 1RM Strength & Cycling Watt/kg Calculator -->
+            <div class="glass-panel rounded-2xl p-5 border border-white/10">
+              <h3 class="font-bold text-base mb-1">Interactive 1-Rep Max & Power-to-Weight Lab</h3>
+              <p class="text-xs text-slate-400 muted-text mb-4">Calculate Epley/Brzycki 1RM training percentages and cycling W/kg</p>
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                <div>
+                  <label class="block text-slate-400 mb-1">Lift Weight (kg/lb)</label>
+                  <input id="calcWeightInput" type="number" value="100" min="1" max="500" class="w-full px-3 py-2 rounded-xl sub-panel font-mono font-bold" />
+                </div>
+                <div>
+                  <label class="block text-slate-400 mb-1">Repetitions Completed</label>
+                  <input id="calcRepsInput" type="number" value="5" min="1" max="30" class="w-full px-3 py-2 rounded-xl sub-panel font-mono font-bold" />
+                </div>
+                <div class="sub-panel rounded-xl p-3 flex flex-col justify-center text-center border border-utopia-lime/40">
+                  <div class="text-[10px] text-utopia-lime font-bold">ESTIMATED 1RM</div>
+                  <div id="calc1RmOutput" class="font-mono font-black text-xl text-white mt-0.5">116.7 kg</div>
+                </div>
+              </div>
+              <div id="calcZonesRow" class="grid grid-cols-4 gap-2 mt-3 text-center font-mono text-xs"></div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <!-- =================================================================== -->
+      <!-- VIEW 5: COMMUNITY CLUBS, ACTIVITY FEED & KUDOS                      -->
+      <!-- =================================================================== -->
+      <main id="view-community" class="tab-view hidden px-4 sm:px-6 pt-5 space-y-6">
+        <section class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <!-- Left: Social Activity Stream with Live Kudos & Comments -->
+          <div class="lg:col-span-7 space-y-4">
+            <div class="glass-panel rounded-2xl p-4 border border-white/10 flex items-center justify-between">
+              <div>
+                <h2 class="font-bold text-base">Utopia Global Club Feed</h2>
+                <p class="text-xs text-slate-400 muted-text">Give Kudos 👍 or drop a comment on clubmates' GPS activities & nutrition streaks</p>
+              </div>
+              <button type="button" id="shareStatusBtn" class="px-3 py-1.5 rounded-xl bg-utopia-lime text-slate-950 font-extrabold text-xs">
+                + Post Club Update
+              </button>
+            </div>
+
+            <div id="socialFeedContainer" class="space-y-4"></div>
+          </div>
+
+          <!-- Right: Active Monthly Challenges & Club Leaderboard -->
+          <div class="lg:col-span-5 space-y-6">
+            <div class="glass-panel rounded-2xl p-5 border border-white/10">
+              <h3 class="font-bold text-base mb-1">Active Global Challenges</h3>
+              <p class="text-xs text-slate-400 muted-text mb-4">Click to Join or Leave official Strava x MyFitnessPal hybrid challenges</p>
+              <div id="challengesContainer" class="space-y-3"></div>
+            </div>
+
+            <!-- Club Leaderboard -->
+            <div class="glass-panel rounded-2xl p-5 border border-white/10">
+              <h3 class="font-bold text-base mb-3">Utopia Track Club — Weekly Leaderboard</h3>
+              <div class="space-y-2.5 text-xs font-mono" id="clubLeaderboardList"></div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <!-- =================================================================== -->
+      <!-- VIEW 6: PLATFORM SHOWCASE, COMPARISON & MEMBERSHIP PLANS            -->
+      <!-- =================================================================== -->
+      <main id="view-platform" class="tab-view hidden px-4 sm:px-6 pt-5 space-y-8">
+        <!-- Why Utopia Fitness Comparison Matrix -->
+        <section class="glass-panel rounded-3xl p-6 sm:p-8 border border-white/10">
+          <div class="max-w-2xl mb-6">
+            <span class="px-2.5 py-1 rounded-full bg-utopia-lime/15 text-utopia-lime font-bold text-xs">THE ALL-IN-ONE CONVERGENCE</span>
+            <h2 class="text-2xl sm:text-3xl font-black mt-2">Why Athletes Are Switching to Utopia Fitness</h2>
+            <p class="text-sm text-slate-400 muted-text mt-1">No more paying for 3 separate subscriptions that don't talk to each other.</p>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs sm:text-sm">
+              <thead>
+                <tr class="border-b border-white/10 text-slate-400 uppercase text-[11px]">
+                  <th class="py-3 px-4">Capability</th>
+                  <th class="py-3 px-4 text-utopia-lime font-black">⚡ Utopia Fitness</th>
+                  <th class="py-3 px-4">Strava</th>
+                  <th class="py-3 px-4">MyFitnessPal</th>
+                  <th class="py-3 px-4">Whoop / Garmin</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-white/5">
+                <tr>
+                  <td class="py-3 px-4 font-semibold">GPS Route Telemetry & Segment KOMs</td>
+                  <td class="py-3 px-4 text-utopia-lime font-bold">✔ Included (10Hz Live)</td>
+                  <td class="py-3 px-4 text-emerald-400">✔ Included</td>
+                  <td class="py-3 px-4 text-slate-500">✖ None</td>
+                  <td class="py-3 px-4 text-amber-400">Partial</td>
+                </tr>
+                <tr>
+                  <td class="py-3 px-4 font-semibold">Verified Barcode & Macro/Micro Diary</td>
+                  <td class="py-3 px-4 text-utopia-lime font-bold">✔ Included (Zero Paywall)</td>
+                  <td class="py-3 px-4 text-slate-500">✖ None</td>
+                  <td class="py-3 px-4 text-emerald-400">✔ Premium Only</td>
+                  <td class="py-3 px-4 text-slate-500">✖ Basic</td>
+                </tr>
+                <tr>
+                  <td class="py-3 px-4 font-semibold">Real-Time Exercise Burn → Macro Auto-Scaling</td>
+                  <td class="py-3 px-4 text-utopia-lime font-bold">✔ Instant Bi-Directional</td>
+                  <td class="py-3 px-4 text-slate-500">✖ No Macro Engine</td>
+                  <td class="py-3 px-4 text-amber-400">Delayed Sync</td>
+                  <td class="py-3 px-4 text-slate-500">✖ None</td>
+                </tr>
+                <tr>
+                  <td class="py-3 px-4 font-semibold">Anatomical Muscle Fatigue & HRV Readiness</td>
+                  <td class="py-3 px-4 text-utopia-lime font-bold">✔ 3D SVG Bio-Map</td>
+                  <td class="py-3 px-4 text-amber-400">Relative Effort Only</td>
+                  <td class="py-3 px-4 text-slate-500">✖ None</td>
+                  <td class="py-3 px-4 text-emerald-400">✔ Included</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Interactive Membership Tiers -->
+        <section class="glass-panel rounded-3xl p-6 sm:p-8 border border-white/10">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <div>
+              <h3 class="text-xl font-black">Choose Your Athlete Tier</h3>
+              <p class="text-xs text-slate-400 muted-text">Instant activation • Hostable anywhere • 100% responsive</p>
+            </div>
+            <div class="flex items-center gap-2 sub-panel p-1 rounded-xl">
+              <button type="button" id="billMonthlyBtn" class="px-3 py-1.5 rounded-lg bg-utopia-lime text-slate-950 font-bold text-xs">Monthly</button>
+              <button type="button" id="billAnnualBtn" class="px-3 py-1.5 rounded-lg text-slate-300 font-bold text-xs">Annual (Save 25%)</button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <div class="sub-panel rounded-2xl p-5 border border-white/10 flex flex-col justify-between">
+              <div>
+                <div class="text-xs font-bold text-slate-400">CORE ATHLETE</div>
+                <div class="text-3xl font-black font-mono mt-2">$0<span class="text-xs font-normal text-slate-400"> / forever</span></div>
+                <ul class="mt-4 space-y-2 text-xs text-slate-300">
+                  <li>✔ Unlimited GPS Activity Recording</li>
+                  <li>✔ Full Macro & Barcode Food Logging</li>
+                  <li>✔ Global Club Feed & Kudos</li>
+                </ul>
+              </div>
+              <button type="button" onclick="selectPlan('Core Athlete Free')" class="mt-6 w-full py-2.5 rounded-xl bg-white/10 hover:bg-white/20 font-bold text-xs transition">Current Base Plan</button>
+            </div>
+
+            <div class="sub-panel rounded-2xl p-5 border-2 border-utopia-lime neon-glow flex flex-col justify-between relative">
+              <span class="absolute -top-3 right-4 px-2.5 py-0.5 rounded-full bg-utopia-lime text-slate-950 font-black text-[10px]">MOST POPULAR</span>
+              <div>
+                <div class="text-xs font-bold text-utopia-lime">UTOPIA PRO APEX</div>
+                <div class="text-3xl font-black font-mono mt-2"><span id="proPriceVal">$11.99</span><span class="text-xs font-normal text-slate-400"> / mo</span></div>
+                <ul class="mt-4 space-y-2 text-xs text-slate-200">
+                  <li>✔ Live Segment KOM/QOM Telemetry Scrubber</li>
+                  <li>✔ Dynamic Workout-to-Macro Auto-Scaling</li>
+                  <li>✔ HRV Readiness & Muscle Recovery Map</li>
+                  <li>✔ Personalized AI Performance Coach</li>
+                </ul>
+              </div>
+              <button type="button" onclick="selectPlan('Utopia Pro Apex')" class="mt-6 w-full py-2.5 rounded-xl bg-utopia-lime hover:opacity-95 text-slate-950 font-black text-xs transition">Activate Pro Trial</button>
+            </div>
+
+            <div class="sub-panel rounded-2xl p-5 border border-white/10 flex flex-col justify-between">
+              <div>
+                <div class="text-xs font-bold text-utopia-cyan">COACH & TEAM SYNDICATE</div>
+                <div class="text-3xl font-black font-mono mt-2"><span id="teamPriceVal">$29.99</span><span class="text-xs font-normal text-slate-400"> / mo</span></div>
+                <ul class="mt-4 space-y-2 text-xs text-slate-300">
+                  <li>✔ Manage up to 25 Athletes in Real Time</li>
+                  <li>✔ Custom Club Challenges & Private Leaderboards</li>
+                  <li>✔ Raw CSV / FIT / JSON Telemetry Exports</li>
+                </ul>
+              </div>
+              <button type="button" onclick="selectPlan('Coach & Team Syndicate')" class="mt-6 w-full py-2.5 rounded-xl bg-utopia-cyan hover:opacity-95 text-slate-950 font-extrabold text-xs transition">Select Team Plan</button>
+            </div>
+          </div>
+        </section>
+      </main>
+
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MOBILE & TABLET FIXED BOTTOM NAVIGATION DOCK (< LG SCREENS)           -->
+  <!-- ===================================================================== -->
+  <nav class="lg:hidden fixed bottom-0 left-0 right-0 z-40 glass-panel border-t border-white/15 px-2 py-1.5 flex items-center justify-around" aria-label="Mobile Bottom Navigation">
+    <button type="button" data-tab="dashboard" class="nav-tab-btn nav-btn-active flex flex-col items-center py-1 px-2.5 rounded-xl text-[10px] font-bold">
+      <span>⚡</span>
+      <span class="mt-0.5">Hub</span>
+    </button>
+    <button type="button" data-tab="strava" class="nav-tab-btn flex flex-col items-center py-1 px-2.5 rounded-xl text-[10px] font-semibold text-slate-400">
+      <span>🗺️</span>
+      <span class="mt-0.5">GPS</span>
+    </button>
+    <button type="button" data-tab="nutrition" class="nav-tab-btn flex flex-col items-center py-1 px-2.5 rounded-xl text-[10px] font-semibold text-slate-400">
+      <span>🥗</span>
+      <span class="mt-0.5">Macros</span>
+    </button>
+    <button type="button" data-tab="recovery" class="nav-tab-btn flex flex-col items-center py-1 px-2.5 rounded-xl text-[10px] font-semibold text-slate-400">
+      <span>🧬</span>
+      <span class="mt-0.5">Recovery</span>
+    </button>
+    <button type="button" data-tab="community" class="nav-tab-btn flex flex-col items-center py-1 px-2.5 rounded-xl text-[10px] font-semibold text-slate-400">
+      <span>🏆</span>
+      <span class="mt-0.5">Clubs</span>
+    </button>
+    <button type="button" data-tab="platform" class="nav-tab-btn flex flex-col items-center py-1 px-2.5 rounded-xl text-[10px] font-semibold text-slate-400">
+      <span>💎</span>
+      <span class="mt-0.5">Pro</span>
+    </button>
+  </nav>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL 1: LOG CUSTOM GPS WORKOUT                                       -->
+  <!-- ===================================================================== -->
+  <div id="workoutModal" class="fixed inset-0 z-50 hidden bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="glass-panel rounded-2xl max-w-md w-full p-6 border border-white/15 space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="font-black text-lg text-utopia-strava">⚡ Log Strava GPS Activity</h3>
+        <button type="button" onclick="closeModal('workoutModal')" class="text-slate-400 hover:text-white text-sm font-bold">✕</button>
+      </div>
+      <form id="logWorkoutForm" class="space-y-3 text-xs">
+        <div>
+          <label class="block text-slate-300 mb-1 font-semibold">Activity Title</label>
+          <input id="woTitle" type="text" required value="Evening Threshold Tempo Run" class="w-full px-3 py-2 rounded-xl sub-panel border border-white/15" />
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-300 mb-1 font-semibold">Sport Type</label>
+            <select id="woType" class="w-full px-3 py-2 rounded-xl sub-panel border border-white/15 font-bold">
+              <option value="Run">🏃 Run</option>
+              <option value="Ride">🚴 Cycling Ride</option>
+              <option value="Swim">🏊 Open Swim</option>
+              <option value="HIIT">🔥 Strength / HIIT</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-slate-300 mb-1 font-semibold">Distance (km)</label>
+            <input id="woDist" type="number" step="0.1" min="0.5" max="300" required value="8.5" class="w-full px-3 py-2 rounded-xl sub-panel font-mono" />
+          </div>
+        </div>
+        <div class="grid grid-cols-3 gap-2">
+          <div>
+            <label class="block text-slate-300 mb-1 font-semibold">Duration (min)</label>
+            <input id="woDur" type="number" min="5" max="1000" required value="38" class="w-full px-3 py-2 rounded-xl sub-panel font-mono" />
+          </div>
+          <div>
+            <label class="block text-slate-300 mb-1 font-semibold">Elev Gain (m)</label>
+            <input id="woElev" type="number" min="0" max="8848" required value="115" class="w-full px-3 py-2 rounded-xl sub-panel font-mono" />
+          </div>
+          <div>
+            <label class="block text-utopia-strava mb-1 font-bold">Burn (kcal)</label>
+            <input id="woKcal" type="number" min="20" max="6000" required value="490" class="w-full px-3 py-2 rounded-xl sub-panel font-mono text-utopia-strava font-bold" />
+          </div>
+        </div>
+        <button type="submit" class="w-full py-2.5 rounded-xl bg-utopia-strava hover:bg-orange-600 text-white font-black text-xs transition">
+          Save Activity & Credit MyFitnessPal Calories
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL 2: BARCODE SCANNER SIMULATOR                                    -->
+  <!-- ===================================================================== -->
+  <div id="scannerModal" class="fixed inset-0 z-50 hidden bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="glass-panel rounded-2xl max-w-md w-full p-6 border border-utopia-cyan/40 mfp-glow space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="font-black text-lg text-utopia-cyan">📷 MyFitnessPal Laser Barcode Scanner</h3>
+        <button type="button" onclick="closeModal('scannerModal')" class="text-slate-400 hover:text-white text-sm font-bold">✕</button>
+      </div>
+      <!-- Simulated Camera Viewfinder -->
+      <div class="relative h-44 rounded-2xl bg-slate-950 border-2 border-utopia-cyan/50 overflow-hidden flex flex-col items-center justify-center">
+        <div class="scanner-beam"></div>
+        <div class="font-mono text-xs text-utopia-cyan tracking-widest mb-2">|||| |||| || ||||| ||| ||||</div>
+        <div id="scannerStatusText" class="text-xs text-slate-300 font-semibold">Align product UPC barcode or choose a preset below...</div>
+      </div>
+      <div class="space-y-2">
+        <div class="text-xs font-bold text-slate-400">Simulate Instant UPC Scan:</div>
+        <div class="grid grid-cols-1 gap-2 text-xs">
+          <button type="button" onclick="triggerBarcodeScan('Maurten Gel 100 Hydrogel', 100, 0, 25, 0, 'Snacks')" class="p-2.5 rounded-xl sub-panel hover:border-utopia-cyan text-left flex justify-between items-center">
+            <span>⚡ <strong>Maurten Gel 100</strong> (UPC: 735009485001)</span>
+            <span class="font-mono text-utopia-cyan">100 kcal • 25g C</span>
+          </button>
+          <button type="button" onclick="triggerBarcodeScan('Optimum Gold Standard Whey Shake', 240, 48, 6, 2, 'Snacks')" class="p-2.5 rounded-xl sub-panel hover:border-utopia-cyan text-left flex justify-between items-center">
+            <span>🥤 <strong>Double Rich Whey Isolate</strong> (UPC: 748927028669)</span>
+            <span class="font-mono text-rose-400">240 kcal • 48g P</span>
+          </button>
+          <button type="button" onclick="triggerBarcodeScan('Wild Alaskan Salmon Bowl', 580, 46, 52, 18, 'Dinner')" class="p-2.5 rounded-xl sub-panel hover:border-utopia-cyan text-left flex justify-between items-center">
+            <span>🍣 <strong>Wild Alaskan Salmon Poke Bowl</strong> (UPC: 041383090214)</span>
+            <span class="font-mono text-utopia-lime">580 kcal • 46g P</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL 3: AI PERFORMANCE & NUTRITION COACH                             -->
+  <!-- ===================================================================== -->
+  <div id="aiCoachModal" class="fixed inset-0 z-50 hidden bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="glass-panel rounded-2xl max-w-lg w-full p-6 border border-utopia-lime/40 neon-glow space-y-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="text-xl">🧠</span>
+          <div>
+            <h3 class="font-black text-base text-utopia-lime">Utopia Neural Performance Coach</h3>
+            <p class="text-[11px] text-slate-400">Synthesizing your Strava Load + MyFitnessPal Macros + HRV</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeModal('aiCoachModal')" class="text-slate-400 hover:text-white text-sm font-bold">✕</button>
+      </div>
+      <div id="aiCoachResponseBox" class="sub-panel rounded-xl p-4 text-xs leading-relaxed text-slate-200 space-y-2">
+        <p><strong class="text-utopia-lime">Readiness Verdict (92% Peak):</strong> Your autonomic nervous system has rebounded strongly (HRV 88 ms, RHR 46 bpm). You are primed for high-intensity threshold or VO2max intervals today.</p>
+        <p><strong class="text-utopia-cyan">Metabolic Fueling Prescription:</strong> With <span id="aiRemainingKcal" class="font-mono font-bold">640 kcal</span> remaining in your net equation and elevated calf eccentric load (62% recovery), aim for <strong>45g complex carbs + 32g leucine-rich protein</strong> within the next 90 minutes.</p>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <button type="button" onclick="generateAiAdvice('race')" class="px-3 py-1.5 rounded-lg sub-panel hover:border-utopia-lime text-xs font-semibold">🏃 Pre-Race Carb Load Plan</button>
+        <button type="button" onclick="generateAiAdvice('recovery')" class="px-3 py-1.5 rounded-lg sub-panel hover:border-utopia-lime text-xs font-semibold">🧬 Fix Calf Fatigue</button>
+        <button type="button" onclick="generateAiAdvice('cut')" class="px-3 py-1.5 rounded-lg sub-panel hover:border-utopia-lime text-xs font-semibold">🔥 Optimize Power-to-Weight</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL 4: ATHLETE PROFILE & GOAL SETTINGS                              -->
+  <!-- ===================================================================== -->
+  <div id="profileModal" class="fixed inset-0 z-50 hidden bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="glass-panel rounded-2xl max-w-md w-full p-6 border border-white/15 space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="font-black text-base">⚙️ Athlete Profile & Metabolic Targets</h3>
+        <button type="button" onclick="closeModal('profileModal')" class="text-slate-400 hover:text-white text-sm font-bold">✕</button>
+      </div>
+      <form id="profileForm" class="space-y-3 text-xs">
+        <div>
+          <label class="block text-slate-300 mb-1">Athlete Display Name</label>
+          <input id="profNameInput" type="text" required value="Aarav Mehta" class="w-full px-3 py-2 rounded-xl sub-panel border border-white/15" />
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-300 mb-1">Base Calorie Goal (kcal)</label>
+            <input id="profBaseKcalInput" type="number" min="1200" max="6000" required value="2450" class="w-full px-3 py-2 rounded-xl sub-panel font-mono" />
+          </div>
+          <div>
+            <label class="block text-slate-300 mb-1">Weekly Distance Goal (km)</label>
+            <input id="profWeeklyDistInput" type="number" min="10" max="500" required value="100" class="w-full px-3 py-2 rounded-xl sub-panel font-mono" />
+          </div>
+        </div>
+        <button type="submit" class="w-full py-2.5 rounded-xl bg-utopia-lime text-slate-950 font-black text-xs">
+          Save Athlete Targets
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div id="toastContainer" class="fixed bottom-16 lg:bottom-6 right-4 z-50 space-y-2 pointer-events-none"></div>
+
+  <!-- ===================================================================== -->
+  <!-- APPLICATION JAVASCRIPT ENGINE                                         -->
+  <!-- ===================================================================== -->
+  <script>
+    // Safe localStorage wrapper
+    function saveState(key, val) {
+      try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) {}
+    }
+    function loadState(key, fallback) {
+      try {
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : fallback;
+      } catch (e) {
+        return fallback;
+      }
+    }
+
+    // Core Application State
+    const state = {
+      unitSystem: 'metric', // 'metric' or 'imperial'
+      lightMode: false,
+      athleteName: 'Aarav Mehta',
+      baseGoalKcal: 2450,
+      weeklyGoalKm: 100,
+      waterMl: 2250,
+      waterGoalMl: 3200,
+      proGoal: 190,
+      carbGoal: 340,
+      fatGoal: 85,
+      selectedRouteIdx: 0,
+      scrubPercent: 45,
+      segmentFilter: 'all',
+      workouts: [
+        { id: 'w1', title: 'Marina Bay Dawn Tempo 10K', type: 'Run', distKm: 10.2, durMin: 43, elevM: 142, kcal: 540, date: 'Today, 06:15 AM', pace: '4:12 /km', hr: 164 },
+        { id: 'w2', title: 'Core & Eccentric Posterior Chain', type: 'HIIT', distKm: 0.0, durMin: 35, elevM: 0, kcal: 200, date: 'Today, 07:10 AM', pace: '138 bpm avg', hr: 138 },
+        { id: 'w3', title: 'Alpe d\'Utopia Threshold Climb', type: 'Ride', distKm: 42.8, durMin: 78, elevM: 940, kcal: 920, date: 'Yesterday', pace: '32.9 km/h', hr: 161 },
+        { id: 'w4', title: 'Victoria Peak Trail Progression', type: 'Run', distKm: 21.4, durMin: 104, elevM: 640, kcal: 1180, date: '2 days ago', pace: '4:51 /km', hr: 158 },
+        { id: 'w5', title: 'Sentosa Open-Water Tempo Swim', type: 'Swim', distKm: 3.2, durMin: 52, elevM: 0, kcal: 480, date: '3 days ago', pace: '1:37 /100m', hr: 146 },
+        { id: 'w6', title: 'Track 8x800m VO2max Intervals', type: 'Run', distKm: 7.0, durMin: 31, elevM: 18, kcal: 430, date: '4 days ago', pace: '3:52 /km', hr: 174 }
+      ],
+      meals: [
+        { id: 'm1', slot: 'Breakfast', name: 'Steel-Cut Oats, Whey & Wild Blueberries', kcal: 620, pro: 44, carb: 82, fat: 12 },
+        { id: 'm2', slot: 'Breakfast', name: 'Double Espresso + Collagen Peptides', kcal: 70, pro: 16, carb: 1, fat: 0 },
+        { id: 'm3', slot: 'Lunch', name: 'Grilled Herb Chicken Quinoa Power Bowl', kcal: 790, pro: 58, carb: 88, fat: 22 },
+        { id: 'm4', slot: 'Dinner', name: 'Seared Atlantic Salmon, Sweet Potato & Asparagus', kcal: 760, pro: 48, carb: 64, fat: 34 },
+        { id: 'm5', slot: 'Snacks', name: 'Maurten Hydrogel 100 + Greek Yogurt', kcal: 310, pro: 12, carb: 55, fat: 6 }
+      ],
+      foodCatalog: [
+        { name: 'Grilled Chicken Breast (200g)', kcal: 330, pro: 62, carb: 0, fat: 7 },
+        { name: 'Maurten Gel 100 Hydrogel (40g)', kcal: 100, pro: 0, carb: 25, fat: 0 },
+        { name: 'Rolled Oats & Chia Power Bowl', kcal: 410, pro: 16, carb: 64, fat: 9 },
+        { name: 'Wild Atlantic Salmon Fillet (180g)', kcal: 370, pro: 40, carb: 0, fat: 22 },
+        { name: 'Whey Isolate Recovery Shake', kcal: 240, pro: 48, carb: 6, fat: 2 },
+        { name: 'Avocado & Poached Eggs on Sourdough', kcal: 460, pro: 22, carb: 38, fat: 24 },
+        { name: 'Jasmine Rice & Teriyaki Tofu Bowl', kcal: 520, pro: 26, carb: 78, fat: 11 },
+        { name: 'Banana & Almond Butter Pre-Run Fuel', kcal: 290, pro: 7, carb: 34, fat: 15 }
+      ],
+      routes: [
+        {
+          name: 'Marina Bay Dawn Tempo 10K',
+          meta: '10.2 km • 142m Elev Gain • Normalized Power: 288W',
+          distKm: 10.2,
+          baseElev: 18,
+          gainM: 142,
+          baseHr: 156,
+          basePower: 285,
+          coord: '1.2834° N, 103.8607° E',
+          points: [[0.08,0.72],[0.18,0.38],[0.31,0.25],[0.48,0.42],[0.62,0.22],[0.77,0.36],[0.89,0.64],[0.94,0.52]],
+          elevProfile: [12,18,26,38,44,35,52,68,61,74,82,69,55,48,62,75,60,42,30,24]
+        },
+        {
+          name: 'Alpe d\'Utopia Summit Climb',
+          meta: '42.8 km • 940m Elev Gain • Normalized Power: 312W',
+          distKm: 42.8,
+          baseElev: 210,
+          gainM: 940,
+          baseHr: 168,
+          basePower: 318,
+          coord: '45.0924° N, 6.0704° E',
+          points: [[0.06,0.82],[0.20,0.70],[0.28,0.56],[0.42,0.50],[0.52,0.36],[0.68,0.28],[0.80,0.18],[0.93,0.12]],
+          elevProfile: [110,145,190,240,310,380,430,510,590,640,710,780,820,860,890,915,940,955,970,985]
+        },
+        {
+          name: 'Victoria Peak Skyrace Trail',
+          meta: '21.4 km • 640m Elev Gain • Technical Singletrack',
+          distKm: 21.4,
+          baseElev: 45,
+          gainM: 640,
+          baseHr: 162,
+          basePower: 274,
+          coord: '22.2759° N, 114.1455° E',
+          points: [[0.10,0.76],[0.24,0.62],[0.38,0.30],[0.54,0.66],[0.69,0.24],[0.84,0.48],[0.92,0.28]],
+          elevProfile: [35,80,160,290,410,330,220,310,480,550,490,390,460,520,430,310,240,180,120,90]
+        },
+        {
+          name: 'Sentosa Open-Water Tri Loop',
+          meta: '5.6 km • Coastal Current • Sighting Efficiency 96%',
+          distKm: 5.6,
+          baseElev: 2,
+          gainM: 14,
+          baseHr: 149,
+          basePower: 245,
+          coord: '1.2494° N, 103.8303° E',
+          points: [[0.12,0.55],[0.30,0.28],[0.55,0.24],[0.78,0.36],[0.88,0.62],[0.60,0.76],[0.28,0.72],[0.12,0.55]],
+          elevProfile: [2,4,5,3,6,8,7,5,9,11,8,6,5,7,6,4,3,4,2,2]
+        }
+      ],
+      segments: [
+        { name: 'Helix Bridge Sprint', type: 'Run', dist: '0.85 km', grade: '+1.2%', pr: '2:48', output: '3:17 /km', rank: '🏆 CR #1 (of 4,820)' },
+        { name: 'Alpe Hairpin 1-7 Gauntlet', type: 'Ride', dist: '4.40 km', grade: '+8.9%', pr: '14:12', output: '334 W (4.6 W/kg)', rank: '⚡ KOM #2 (of 9,140)' },
+        { name: 'Dragon\'s Back Ridge Ascent', type: 'Run', dist: '2.10 km', grade: '+11.4%', pr: '10:04', output: '4:47 /km', rank: '🔥 Top 1% (#12)' },
+        { name: 'Bay East Coastal TT', type: 'Ride', dist: '12.0 km', grade: '0.4%', pr: '15:48', output: '318 W (45.5 km/h)', rank: '🏆 KOM #1 (of 6,310)' },
+        { name: 'Mount Faber Switchback', type: 'Run', dist: '1.35 km', grade: '+7.6%', pr: '5:19', output: '3:56 /km', rank: '🥈 #3 Club Record' }
+      ],
+      muscles: {
+        calves: {
+          title: 'Gastrocnemius & Soleus (Calves)',
+          badge: '62% (High Eccentric Load)',
+          badgeColor: 'text-rose-400 bg-rose-500/20',
+          source: 'Primary strain driver: Marina Bay Dawn Tempo 10K (forefoot strike cadence 184 spm).',
+          protocol: '12 min pneumatic compression boots + eccentric calf lowers (3x15) + 400mg Magnesium Glycinate before sleep.'
+        },
+        quads: {
+          title: 'Quadriceps Femoris & Glutes',
+          badge: '74% (Moderate Climb Load)',
+          badgeColor: 'text-amber-400 bg-amber-500/20',
+          source: 'Primary strain driver: Alpe d\'Utopia Threshold Climb (940m elevation gain at 312W).',
+          protocol: '10 min percussive therapy on vastus lateralis + couch stretch (2 min/side) + 35g slow-release casein.'
+        },
+        core: {
+          title: 'Rectus Abdominis & Obliques (Core)',
+          badge: '88% (Primed & Stable)',
+          badgeColor: 'text-utopia-cyan bg-utopia-cyan/20',
+          source: 'Primary strain driver: Core & Eccentric Posterior Chain session this morning.',
+          protocol: 'Ready for full stabilization load. Include thoracic mobility openers prior to tomorrow\'s run.'
+        },
+        chest: {
+          title: 'Pectoralis Major & Anterior Chain',
+          badge: '95% (Fully Recovered)',
+          badgeColor: 'text-emerald-400 bg-emerald-500/20',
+          source: 'Minimal upper-body pushing fatigue over the past 48 hours.',
+          protocol: 'Cleared for heavy upper-body compound pressing or high-volume swim intervals.'
+        },
+        shoulders: {
+          title: 'Deltoids & Rotator Cuff',
+          badge: '93% (Fresh)',
+          badgeColor: 'text-emerald-400 bg-emerald-500/20',
+          source: 'Recovered from Sentosa Open-Water Tempo Swim.',
+          protocol: 'Perform 2 sets of banded face-pulls and scapular wall slides for warm-up.'
+        },
+        arms: {
+          title: 'Biceps, Triceps & Forearms',
+          badge: '94% (Fresh)',
+          badgeColor: 'text-emerald-400 bg-emerald-500/20',
+          source: 'Low peripheral fatigue detected.',
+          protocol: 'Cleared for pull-ups, deadlifts, or paddle-assisted swim sets.'
+        }
+      },
+      feed: [
+        {
+          id: 'f1',
+          author: 'Elena Rostova',
+          initials: 'ER',
+          badge: 'OLYMPIC TRI',
+          time: '42m ago • Zurich, Switzerland',
+          title: 'Lake Zurich Brick: 40K Aero Ride + 8K Off-the-Bike Tempo',
+          stats: '48.0 km • 1h 36m • 3:58/km run split • +1,120 kcal synced to MFP',
+          kudos: 84,
+          liked: false,
+          comments: [
+            { user: 'Marcus Vance', text: 'Blistering transition pace Elena! That final 5K split is flying.' }
+          ]
+        },
+        {
+          id: 'f2',
+          author: 'Kenji Takahashi',
+          initials: 'KT',
+          badge: 'MARATHON SUB-2:30',
+          time: '2h ago • Tokyo, Japan',
+          title: 'Odaiba Waterfront 16K Progression + 30-Day Macro Streak!',
+          stats: '16.2 km • 3:44 /km avg • HRV 94 ms • 3,420 kcal Perfectly Hit',
+          kudos: 129,
+          liked: true,
+          comments: [
+            { user: 'Aarav Mehta', text: '30-day macro streak while hitting 110km/wk is elite discipline 🔥' }
+          ]
+        },
+        {
+          id: 'f3',
+          author: 'Sofia Lindqvist',
+          initials: 'SL',
+          badge: 'GRAVEL PRO',
+          time: '5h ago • Girona, Spain',
+          title: 'Rocacorba Summit Repeats (KOM/QOM Hunt)',
+          stats: '64.5 km • 1,480m Elev • 4.8 W/kg • 1,540 kcal Burned',
+          kudos: 67,
+          liked: false,
+          comments: []
+        }
+      ],
+      challenges: [
+        { id: 'c1', name: 'October 100K Speed Blitz', desc: 'Log 100 km of running in October', progress: '84.6 / 100 km', pct: 85, joined: true, participants: '42,910' },
+        { id: 'c2', name: 'Everesting 8,848m Vertical Climb', desc: 'Accumulate 8,848m of elevation gain across rides & trails', progress: '6,420 / 8,848 m', pct: 73, joined: true, participants: '18,340' },
+        { id: 'c3', name: '30-Day Precision Protein Streak', desc: 'Hit within ±5% of your MyFitnessPal protein target for 30 days', progress: '28 / 30 days', pct: 93, joined: true, participants: '95,120' }
+      ],
+      liveRec: {
+        running: false,
+        seconds: 0,
+        distKm: 0.0,
+        kcal: 0,
+        laps: [],
+        intervalId: null
+      }
+    };
+
+    // Toast helper
+    function showToast(message, accent = 'lime') {
+      const container = document.getElementById('toastContainer');
+      if (!container) return;
+      const el = document.createElement('div');
+      const borderCol = accent === 'strava' ? 'border-utopia-strava text-utopia-strava' : accent === 'cyan' ? 'border-utopia-cyan text-utopia-cyan' : 'border-utopia-lime text-utopia-lime';
+      el.className = `glass-panel px-4 py-2.5 rounded-xl border ${borderCol} shadow-2xl text-xs font-bold flex items-center gap-2 transition-all duration-300`;
+      el.textContent = message;
+      container.appendChild(el);
+      setTimeout(() => {
+        el.style.opacity = '0';
+        setTimeout(() => el.remove(), 300);
+      }, 2800);
+    }
+
+    // Unit conversion helpers
+    function formatDist(km) {
+      if (state.unitSystem === 'imperial') {
+        return (km * 0.621371).toFixed(1) + ' mi';
+      }
+      return km.toFixed(1) + ' km';
+    }
+    function formatElev(m) {
+      if (state.unitSystem === 'imperial') {
+        return Math.round(m * 3.28084).toLocaleString() + ' ft';
+      }
+      return Math.round(m).toLocaleString() + ' m';
+    }
+
+    // Tab Navigation
+    const viewMeta = {
+      dashboard: { title: 'Athlete Command Hub', sub: 'Unified Strava GPS Performance + MyFitnessPal Metabolic Equation' },
+      strava: { title: 'GPS & Strava Telemetry Studio', sub: 'Interactive Route Elevation Scrubber, Segment KOMs & Live GPS Recorder' },
+      nutrition: { title: 'MyFitnessPal Precision Nutrition Lab', sub: 'Dynamic Workout-Synced Macros, Verified Food Search & Barcode Scanner' },
+      recovery: { title: 'Biometrics, Sleep & Muscle Recovery Map', sub: 'Anatomical Muscle Fatigue Inspector, HRV Readiness & 1RM Strength Lab' },
+      community: { title: 'Utopia Clubs, Feed & Global Challenges', sub: 'Social Activity Stream, Interactive Kudos & Club Leaderboards' },
+      platform: { title: 'Why Utopia Fitness & Pro Tiers', sub: 'Platform Convergence Matrix & Membership Plans' }
+    };
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-view').forEach(v => v.classList.add('hidden'));
+      const target = document.getElementById('view-' + tabId);
+      if (target) target.classList.remove('hidden');
+
+      document.querySelectorAll('.nav-tab-btn').forEach(btn => {
+        if (btn.getAttribute('data-tab') === tabId) {
+          btn.classList.add('nav-btn-active');
+          btn.classList.remove('text-slate-400', 'text-slate-300');
+        } else {
+          btn.classList.remove('nav-btn-active');
+          btn.classList.add('text-slate-300');
+        }
+      });
+
+      if (viewMeta[tabId]) {
+        document.getElementById('activeViewTitle').textContent = viewMeta[tabId].title;
+        document.getElementById('activeViewSubtitle').textContent = viewMeta[tabId].sub;
+      }
+
+      if (tabId === 'strava') {
+        setTimeout(drawGpsCanvas, 50);
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    window.switchTab = switchTab;
+
+    // Modal controls
+    function openModal(id) {
+      const m = document.getElementById(id);
+      if (m) m.classList.remove('hidden');
+    }
+    function closeModal(id) {
+      const m = document.getElementById(id);
+      if (m) m.classList.add('hidden');
+    }
+    window.openModal = openModal;
+    window.closeModal = closeModal;
+
+    // Calculate Totals & Sync Strava Burn <-> MyFitnessPal Equation
+    function computeTotals() {
+      // Today's workouts burn
+      const todayWorkouts = state.workouts.filter(w => w.date.startsWith('Today'));
+      const exerciseBurn = todayWorkouts.reduce((acc, w) => acc + Number(w.kcal || 0), 0);
+
+      // Total weekly distance & elevation
+      const weeklyKm = state.workouts.reduce((acc, w) => acc + Number(w.distKm || 0), 0);
+      const weeklyElev = state.workouts.reduce((acc, w) => acc + Number(w.elevM || 0), 0);
+
+      // Meals totals
+      const foodKcal = state.meals.reduce((acc, m) => acc + Number(m.kcal || 0), 0);
+      const proG = state.meals.reduce((acc, m) => acc + Number(m.pro || 0), 0);
+      const carbG = state.meals.reduce((acc, m) => acc + Number(m.carb || 0), 0);
+      const fatG = state.meals.reduce((acc, m) => acc + Number(m.fat || 0), 0);
+
+      const totalAllowance = state.baseGoalKcal + exerciseBurn;
+      const netRemaining = totalAllowance - foodKcal;
+
+      // Update Equation UI
+      document.getElementById('eqBaseGoal').textContent = state.baseGoalKcal.toLocaleString();
+      document.getElementById('eqExerciseBurn').textContent = '+' + exerciseBurn.toLocaleString();
+      document.getElementById('eqFoodLogged').textContent = '-' + foodKcal.toLocaleString();
+      const remEl = document.getElementById('eqNetRemaining');
+      remEl.textContent = (netRemaining >= 0 ? '+' : '') + netRemaining.toLocaleString();
+      remEl.className = `font-mono font-black text-base sm:text-lg mt-0.5 ${netRemaining >= 0 ? 'text-utopia-lime' : 'text-rose-400'}`;
+      document.getElementById('eqWorkoutCount').textContent = todayWorkouts.length;
+      document.getElementById('sidebarNetKcal').textContent = (netRemaining >= 0 ? '+' : '') + netRemaining;
+      const aiRem = document.getElementById('aiRemainingKcal');
+      if (aiRem) aiRem.textContent = netRemaining + ' kcal';
+
+      // Update Weekly GPS KPI
+      const distVal = state.unitSystem === 'imperial' ? (weeklyKm * 0.621371).toFixed(1) : weeklyKm.toFixed(1);
+      const distUnit = state.unitSystem === 'imperial' ? 'mi' : 'km';
+      document.getElementById('kpiWeeklyDist').textContent = distVal;
+      document.getElementById('kpiWeeklyDistUnit').textContent = distUnit;
+      document.getElementById('kpiWeeklyElev').textContent = formatElev(weeklyElev);
+      const goalVal = state.unitSystem === 'imperial' ? Math.round(state.weeklyGoalKm * 0.621371) + ' mi' : state.weeklyGoalKm + ' km';
+      document.getElementById('kpiDistGoalText').textContent = goalVal;
+      const distPct = Math.min(100, Math.round((weeklyKm / state.weeklyGoalKm) * 100));
+      document.getElementById('kpiDistBar').style.width = distPct + '%';
+
+      // Update Macro KPIs
+      document.getElementById('kpiProCur').textContent = proG;
+      document.getElementById('kpiProGoal').textContent = state.proGoal;
+      document.getElementById('kpiCarbCur').textContent = carbG;
+      document.getElementById('kpiCarbGoal').textContent = state.carbGoal;
+      document.getElementById('kpiFatCur').textContent = fatG;
+      document.getElementById('kpiFatGoal').textContent = state.fatGoal;
+
+      // Update Nutrition View Bars
+      document.getElementById('nutKcalText').textContent = `${foodKcal.toLocaleString()} / ${totalAllowance.toLocaleString()} kcal`;
+      document.getElementById('nutKcalBar').style.width = Math.min(100, Math.round((foodKcal / totalAllowance) * 100)) + '%';
+      document.getElementById('nutBonusBurnText').textContent = `+${exerciseBurn} kcal`;
+
+      document.getElementById('nutProText').textContent = `${proG} / ${state.proGoal} g`;
+      document.getElementById('nutProBar').style.width = Math.min(100, Math.round((proG / state.proGoal) * 100)) + '%';
+
+      document.getElementById('nutCarbText').textContent = `${carbG} / ${state.carbGoal} g`;
+      document.getElementById('nutCarbBar').style.width = Math.min(100, Math.round((carbG / state.carbGoal) * 100)) + '%';
+
+      document.getElementById('nutFatText').textContent = `${fatG} / ${state.fatGoal} g`;
+      document.getElementById('nutFatBar').style.width = Math.min(100, Math.round((fatG / state.fatGoal) * 100)) + '%';
+
+      // Hydration
+      const waterL = (state.waterMl / 1000).toFixed(2);
+      document.getElementById('kpiWaterVal').textContent = waterL;
+      document.getElementById('headerWaterLabel').textContent = waterL + 'L';
+      document.getElementById('kpiWaterBar').style.width = Math.min(100, Math.round((state.waterMl / state.waterGoalMl) * 100)) + '%';
+    }
+
+    // Hydration Adjuster
+    function adjustWater(deltaMl) {
+      state.waterMl = Math.max(0, Math.min(6000, state.waterMl + deltaMl));
+      computeTotals();
+      showToast(`💧 Hydration updated: ${(state.waterMl / 1000).toFixed(2)}L logged today`, 'cyan');
+    }
+    window.adjustWater = adjustWater;
+
+    // Render Dashboard Workouts & Meals
+    function renderDashboardLists() {
+      const woContainer = document.getElementById('dashboardWorkoutList');
+      woContainer.innerHTML = state.workouts.slice(0, 4).map(w => {
+        const badgeCol = w.type === 'Run' ? 'bg-utopia-strava/20 text-utopia-strava' : w.type === 'Ride' ? 'bg-utopia-cyan/20 text-utopia-cyan' : 'bg-utopia-lime/20 text-utopia-lime';
+        return `
+          <div class="sub-panel rounded-xl p-3 flex items-center justify-between gap-3">
+            <div class="min-w-0">
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold ${badgeCol}">${w.type.toUpperCase()}</span>
+                <span class="font-bold text-xs sm:text-sm truncate">${w.title}</span>
+              </div>
+              <div class="text-[11px] text-slate-400 muted-text mt-1 font-mono">
+                ${w.date} • ${w.distKm > 0 ? formatDist(w.distKm) + ' • ' : ''}${w.durMin}m • Elev ${formatElev(w.elevM)}
+              </div>
+            </div>
+            <div class="text-right shrink-0">
+              <div class="font-mono font-bold text-xs sm:text-sm text-utopia-strava">+${w.kcal} kcal</div>
+              <div class="text-[10px] text-slate-400 font-mono">${w.pace}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Dashboard Meal Summary by Slot
+      const slots = ['Breakfast', 'Lunch', 'Dinner', 'Snacks'];
+      const mealContainer = document.getElementById('dashboardMealSummary');
+      mealContainer.innerHTML = slots.map(slot => {
+        const items = state.meals.filter(m => m.slot === slot);
+        const kcal = items.reduce((a, b) => a + b.kcal, 0);
+        const pro = items.reduce((a, b) => a + b.pro, 0);
+        const carb = items.reduce((a, b) => a + b.carb, 0);
+        const fat = items.reduce((a, b) => a + b.fat, 0);
+        return `
+          <div class="sub-panel rounded-xl p-3 flex items-center justify-between gap-3">
+            <div>
+              <div class="font-bold text-xs sm:text-sm">${slot} <span class="text-xs font-normal text-slate-400">(${items.length} items)</span></div>
+              <div class="text-[11px] text-slate-400 muted-text font-mono mt-0.5">
+                P: <strong class="text-rose-400">${pro}g</strong> • C: <strong class="text-utopia-cyan">${carb}g</strong> • F: <strong class="text-amber-400">${fat}g</strong>
+              </div>
+            </div>
+            <div class="font-mono font-extrabold text-sm text-utopia-cyan">${kcal} kcal</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Render Food Catalog & Meal Diary in Nutrition View
+    function renderNutritionView() {
+      const query = (document.getElementById('foodSearchInput')?.value || '').toLowerCase();
+      const dbList = document.getElementById('foodDatabaseList');
+      const filtered = state.foodCatalog.filter(f => f.name.toLowerCase().includes(query));
+      dbList.innerHTML = filtered.map((f, idx) => `
+        <div class="sub-panel rounded-xl p-2.5 flex items-center justify-between gap-2 hover:border-utopia-cyan/50 transition">
+          <div class="min-w-0">
+            <div class="font-bold text-xs truncate">${f.name}</div>
+            <div class="text-[10px] text-slate-400 font-mono">
+              ${f.kcal} kcal • <span class="text-rose-400">${f.pro}g P</span> • <span class="text-utopia-cyan">${f.carb}g C</span> • <span class="text-amber-400">${f.fat}g F</span>
+            </div>
+          </div>
+          <button type="button" onclick="quickAddCatalogFood(${idx})" class="px-2.5 py-1 rounded-lg bg-utopia-cyan/20 hover:bg-utopia-cyan text-utopia-cyan hover:text-slate-950 font-bold text-xs shrink-0 transition">
+            + Log
+          </button>
+        </div>
+      `).join('');
+
+      // Render Full Meal Diary
+      const slots = ['Breakfast', 'Lunch', 'Dinner', 'Snacks'];
+      const diaryEl = document.getElementById('mealDiaryContainer');
+      diaryEl.innerHTML = slots.map(slot => {
+        const items = state.meals.filter(m => m.slot === slot);
+        const slotKcal = items.reduce((a, b) => a + b.kcal, 0);
+        return `
+          <div class="sub-panel rounded-xl p-3.5 border border-white/5">
+            <div class="flex items-center justify-between pb-2 mb-2 border-b border-white/10">
+              <span class="font-extrabold text-xs sm:text-sm uppercase tracking-wider text-utopia-cyan">${slot}</span>
+              <span class="font-mono font-bold text-xs">${slotKcal} kcal</span>
+            </div>
+            <div class="space-y-2">
+              ${items.length === 0 ? `<div class="text-xs text-slate-500 italic">No foods logged yet in ${slot}</div>` : items.map(item => `
+                <div class="flex items-center justify-between text-xs bg-slate-900/50 px-3 py-2 rounded-lg">
+                  <div>
+                    <div class="font-semibold">${item.name}</div>
+                    <div class="text-[10px] font-mono text-slate-400">
+                      P: ${item.pro}g • C: ${item.carb}g • F: ${item.fat}g
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-3">
+                    <span class="font-mono font-bold text-utopia-lime">${item.kcal} kcal</span>
+                    <button type="button" onclick="deleteMealItem('${item.id}')" class="text-slate-400 hover:text-rose-400 font-bold" title="Remove Item">✕</button>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function quickAddCatalogFood(catalogIdx) {
+      const query = (document.getElementById('foodSearchInput')?.value || '').toLowerCase();
+      const filtered = state.foodCatalog.filter(f => f.name.toLowerCase().includes(query));
+      const food = filtered[catalogIdx];
+      if (!food) return;
+      const slot = document.getElementById('targetMealSlot').value || 'Snacks';
+      state.meals.push({
+        id: 'm_' + Date.now() + Math.random(),
+        slot,
+        name: food.name,
+        kcal: food.kcal,
+        pro: food.pro,
+        carb: food.carb,
+        fat: food.fat
+      });
+      computeTotals();
+      renderDashboardLists();
+      renderNutritionView();
+      showToast(`🥗 Logged "${food.name}" (${food.kcal} kcal) to ${slot}`, 'cyan');
+    }
+    window.quickAddCatalogFood = quickAddCatalogFood;
+
+    function deleteMealItem(id) {
+      state.meals = state.meals.filter(m => m.id !== id);
+      computeTotals();
+      renderDashboardLists();
+      renderNutritionView();
+      showToast('Removed food item from diary', 'cyan');
+    }
+    window.deleteMealItem = deleteMealItem;
+
+    // Barcode Scanner Trigger
+    function triggerBarcodeScan(name, kcal, pro, carb, fat, slot) {
+      const statusEl = document.getElementById('scannerStatusText');
+      if (statusEl) statusEl.textContent = `✔ UPC VERIFIED: ${name} (${kcal} kcal)`;
+      state.meals.push({
+        id: 'scan_' + Date.now(),
+        slot,
+        name: name + ' [Scanned]',
+        kcal,
+        pro,
+        carb,
+        fat
+      });
+      computeTotals();
+      renderDashboardLists();
+      renderNutritionView();
+      setTimeout(() => {
+        closeModal('scannerModal');
+        showToast(`📷 Barcode Scanned: ${name} (+${kcal} kcal)`, 'cyan');
+      }, 450);
+    }
+    window.triggerBarcodeScan = triggerBarcodeScan;
+
+    // Interactive Strava GPS Canvas Map & Elevation Scrubber
+    function drawGpsCanvas() {
+      const canvas = document.getElementById('gpsTelemetryCanvas');
+      if (!canvas) return;
+      const rect = canvas.parentElement.getBoundingClientRect();
+      canvas.width = Math.max(300, rect.width);
+      canvas.height = Math.max(240, rect.height);
+      const ctx = canvas.getContext('2d');
+      const w = canvas.width;
+      const h = canvas.height;
+
+      const route = state.routes[state.selectedRouteIdx];
+      const pct = state.scrubPercent / 100;
+
+      // Background dark topographic grid
+      ctx.fillStyle = '#070B12';
+      ctx.fillRect(0, 0, w, h);
+
+      ctx.strokeStyle = 'rgba(148, 163, 184, 0.08)';
+      ctx.lineWidth = 1;
+      for (let x = 0; x < w; x += 40) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
+      }
+      for (let y = 0; y < h; y += 40) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+      }
+
+      // Draw Elevation Profile in bottom 38% of canvas
+      const elevTop = h * 0.60;
+      const elevH = h * 0.32;
+      const prof = route.elevProfile;
+      const maxE = Math.max(...prof, 10);
+      const minE = Math.min(...prof, 0);
+
+      ctx.beginPath();
+      ctx.moveTo(24, h - 16);
+      prof.forEach((val, idx) => {
+        const px = 24 + (idx / (prof.length - 1)) * (w - 48);
+        const py = (h - 16) - ((val - minE) / Math.max(1, maxE - minE)) * elevH;
+        ctx.lineTo(px, py);
+      });
+      ctx.lineTo(w - 24, h - 16);
+      ctx.closePath();
+      const elevGrad = ctx.createLinearGradient(0, elevTop, 0, h);
+      elevGrad.addColorStop(0, 'rgba(252, 76, 2, 0.38)');
+      elevGrad.addColorStop(1, 'rgba(252, 76, 2, 0.02)');
+      ctx.fillStyle = elevGrad;
+      ctx.fill();
+
+      // Elevation Stroke
+      ctx.beginPath();
+      prof.forEach((val, idx) => {
+        const px = 24 + (idx / (prof.length - 1)) * (w - 48);
+        const py = (h - 16) - ((val - minE) / Math.max(1, maxE - minE)) * elevH;
+        if (idx === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      });
+      ctx.strokeStyle = '#FC4C02';
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
+
+      // Draw GPS Polyline in upper 58% of canvas
+      const mapH = h * 0.54;
+      const pts = route.points.map(p => [24 + p[0] * (w - 48), 18 + p[1] * mapH]);
+
+      ctx.beginPath();
+      pts.forEach((pt, idx) => {
+        if (idx === 0) ctx.moveTo(pt[0], pt[1]);
+        else ctx.lineTo(pt[0], pt[1]);
+      });
+      ctx.strokeStyle = '#00F0FF';
+      ctx.lineWidth = 4;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.stroke();
+
+      // Interpolate current scrubber position along GPS route
+      const totalSegs = pts.length - 1;
+      const exactIdx = pct * totalSegs;
+      const segIdx = Math.min(totalSegs - 1, Math.floor(exactIdx));
+      const segFrac = exactIdx - segIdx;
+      const curX = pts[segIdx][0] + (pts[segIdx + 1][0] - pts[segIdx][0]) * segFrac;
+      const curY = pts[segIdx][1] + (pts[segIdx + 1][1] - pts[segIdx][1]) * segFrac;
+
+      // Start & Finish Pins
+      ctx.fillStyle = '#10B981';
+      ctx.beginPath(); ctx.arc(pts[0][0], pts[0][1], 6, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#FC4C02';
+      ctx.beginPath(); ctx.arc(pts[pts.length - 1][0], pts[pts.length - 1][1], 6, 0, Math.PI * 2); ctx.fill();
+
+      // Active Telemetry Beacon on Route & Elevation Line
+      ctx.fillStyle = '#CCFF00';
+      ctx.beginPath(); ctx.arc(curX, curY, 8, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = '#090D16';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Vertical Scrubber Line on Elevation Profile
+      const scrubX = 24 + pct * (w - 48);
+      ctx.strokeStyle = 'rgba(204, 255, 0, 0.75)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(scrubX, elevTop - 10);
+      ctx.lineTo(scrubX, h - 12);
+      ctx.stroke();
+
+      // Update Telemetry DOM Readouts
+      const curDist = route.distKm * pct;
+      const profIdx = Math.min(prof.length - 1, Math.floor(pct * (prof.length - 1)));
+      const curElev = prof[profIdx];
+      const nextElev = prof[Math.min(prof.length - 1, profIdx + 1)];
+      const grade = ((nextElev - curElev) * 0.35).toFixed(1);
+      const curHr = Math.round(route.baseHr + Math.sin(pct * 9) * 11 + (grade > 0 ? grade * 1.8 : 0));
+      const curPow = Math.round(route.basePower + Math.cos(pct * 7) * 28 + (grade > 0 ? grade * 9 : -8));
+
+      document.getElementById('stravaMapTitle').textContent = route.name;
+      document.getElementById('stravaMapMeta').textContent = route.meta;
+      document.getElementById('scrubPctLabel').textContent = Math.round(pct * 100) + '%';
+      document.getElementById('scrubCoordLabel').textContent = route.coord;
+      document.getElementById('scrubDist').textContent = formatDist(curDist);
+      document.getElementById('scrubElev').textContent = formatElev(curElev);
+      document.getElementById('scrubGrade').textContent = (grade >= 0 ? '+' : '') + grade + '%';
+      document.getElementById('scrubHr').textContent = curHr + ' bpm';
+      document.getElementById('scrubPower').textContent = curPow + ' W';
+    }
+
+    // Segment Table Renderer
+    function renderSegments() {
+      const tbody = document.getElementById('segmentTableBody');
+      const filtered = state.segments.filter(s => state.segmentFilter === 'all' || s.type === state.segmentFilter);
+      tbody.innerHTML = filtered.map(s => `
+        <tr class="hover:bg-white/5 transition">
+          <td class="py-3 px-3 font-sans font-bold text-white">${s.name}</td>
+          <td class="py-3 px-3"><span class="px-2 py-0.5 rounded bg-white/10 text-[10px] font-bold">${s.type}</span></td>
+          <td class="py-3 px-3 text-right">${s.dist} <span class="text-amber-400">(${s.grade})</span></td>
+          <td class="py-3 px-3 text-right font-bold text-utopia-lime">${s.pr}</td>
+          <td class="py-3 px-3 text-right text-utopia-cyan">${s.output}</td>
+          <td class="py-3 px-3 text-right font-sans font-bold text-amber-300">${s.rank}</td>
+        </tr>
+      `).join('');
+    }
+
+    // Anatomical Muscle Selection
+    function selectMuscle(key) {
+      const m = state.muscles[key];
+      if (!m) return;
+      document.getElementById('muscleTitle').textContent = m.title;
+      const badge = document.getElementById('muscleScoreBadge');
+      badge.textContent = m.badge;
+      badge.className = `px-2 py-0.5 rounded font-mono font-bold text-xs ${m.badgeColor}`;
+      document.getElementById('muscleStrainSource').textContent = m.source;
+      document.getElementById('muscleProtocol').textContent = m.protocol;
+      showToast(`🧬 Inspected ${m.title}`, 'lime');
+    }
+    window.selectMuscle = selectMuscle;
+
+    // 1RM Strength Calculator
+    function update1RmCalc() {
+      const w = parseFloat(document.getElementById('calcWeightInput')?.value || 100);
+      const r = parseFloat(document.getElementById('calcRepsInput')?.value || 5);
+      const oneRm = w * (1 + r / 30);
+      const unit = state.unitSystem === 'imperial' ? 'lb' : 'kg';
+      document.getElementById('calc1RmOutput').textContent = `${oneRm.toFixed(1)} ${unit}`;
+
+      const zones = [
+        { pct: 95, label: 'Peak (1-2 reps)' },
+        { pct: 85, label: 'Strength (5 reps)' },
+        { pct: 75, label: 'Hypertrophy (10)' },
+        { pct: 65, label: 'Speed-Power' }
+      ];
+      document.getElementById('calcZonesRow').innerHTML = zones.map(z => `
+        <div class="sub-panel rounded-lg p-2">
+          <div class="text-[10px] text-slate-400 font-sans">${z.pct}% (${z.label})</div>
+          <div class="font-bold text-utopia-cyan mt-0.5">${(oneRm * z.pct / 100).toFixed(1)} ${unit}</div>
+        </div>
+      `).join('');
+    }
+
+    // Social Feed & Challenges Renderer
+    function renderCommunity() {
+      const feedEl = document.getElementById('socialFeedContainer');
+      feedEl.innerHTML = state.feed.map(post => `
+        <div class="glass-panel rounded-2xl p-5 border border-white/10 space-y-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-full bg-gradient-to-br from-utopia-strava to-utopia-cyan flex items-center justify-center font-black text-xs text-slate-950">
+                ${post.initials}
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="font-bold text-sm">${post.author}</span>
+                  <span class="px-1.5 py-0.5 rounded bg-white/10 text-[10px] font-mono text-utopia-lime">${post.badge}</span>
+                </div>
+                <div class="text-[11px] text-slate-400 muted-text">${post.time}</div>
+              </div>
+            </div>
+            <button type="button" onclick="toggleKudos('${post.id}')" class="px-3 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1.5 transition ${post.liked ? 'bg-utopia-strava text-white' : 'sub-panel text-slate-200 hover:border-utopia-strava'}">
+              <span>👍 Kudos</span>
+              <span class="font-mono">${post.kudos}</span>
+            </button>
+          </div>
+          <div>
+            <h4 class="font-extrabold text-sm sm:text-base">${post.title}</h4>
+            <p class="text-xs font-mono text-utopia-cyan mt-1">${post.stats}</p>
+          </div>
+          <div class="space-y-1.5 pt-2 border-t border-white/10">
+            ${post.comments.map(c => `
+              <div class="text-xs bg-slate-900/50 px-3 py-1.5 rounded-lg">
+                <strong class="text-utopia-lime">${c.user}:</strong> <span class="text-slate-200">${c.text}</span>
+              </div>
+            `).join('')}
+            <div class="flex gap-2 pt-1">
+              <input id="commentInput_${post.id}" type="text" placeholder="Drop a club comment..." class="flex-1 px-3 py-1.5 rounded-lg sub-panel text-xs border border-white/10" />
+              <button type="button" onclick="addFeedComment('${post.id}')" class="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-bold">Post</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+
+      // Challenges
+      const chalEl = document.getElementById('challengesContainer');
+      chalEl.innerHTML = state.challenges.map(c => `
+        <div class="sub-panel rounded-xl p-3.5 space-y-2">
+          <div class="flex items-center justify-between gap-2">
+            <div>
+              <div class="font-bold text-xs sm:text-sm">${c.name}</div>
+              <div class="text-[11px] text-slate-400 muted-text">${c.desc} • ${c.participants} athletes</div>
+            </div>
+            <button type="button" onclick="toggleChallenge('${c.id}')" class="px-3 py-1 rounded-lg font-bold text-xs shrink-0 ${c.joined ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'bg-utopia-lime text-slate-950'}">
+              ${c.joined ? '✔ Joined' : 'Join'}
+            </button>
+          </div>
+          <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+            <div class="bg-gradient-to-r from-utopia-strava to-utopia-lime h-full rounded-full" style="width:${c.pct}%"></div>
+          </div>
+          <div class="flex justify-between text-[11px] font-mono text-slate-400">
+            <span>${c.progress}</span>
+            <span class="text-utopia-lime">${c.pct}%</span>
+          </div>
+        </div>
+      `).join('');
+
+      // Leaderboard
+      const leaders = [
+        { rank: 1, name: 'Kenji Takahashi', km: '118.4 km', kcal: '14,200 kcal', score: '9,840 pts' },
+        { rank: 2, name: 'Elena Rostova', km: '104.2 km', kcal: '12,850 kcal', score: '9,410 pts' },
+        { rank: 3, name: state.athleteName + ' (You)', km: formatDist(state.workouts.reduce((a,b)=>a+b.distKm,0)), kcal: '11,490 kcal', score: '8,920 pts' },
+        { rank: 4, name: 'Sofia Lindqvist', km: '79.0 km', kcal: '10,120 kcal', score: '8,110 pts' }
+      ];
+      document.getElementById('clubLeaderboardList').innerHTML = leaders.map(l => `
+        <div class="sub-panel rounded-xl p-2.5 flex items-center justify-between ${l.rank === 3 ? 'border border-utopia-lime/50' : ''}">
+          <div class="flex items-center gap-2.5">
+            <span class="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center font-bold text-[11px] text-utopia-lime">#${l.rank}</span>
+            <span class="font-sans font-bold">${l.name}</span>
+          </div>
+          <div class="text-right">
+            <span class="text-utopia-cyan">${l.km}</span> • <span class="text-utopia-lime font-bold">${l.score}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function toggleKudos(postId) {
+      const post = state.feed.find(p => p.id === postId);
+      if (!post) return;
+      post.liked = !post.liked;
+      post.kudos += post.liked ? 1 : -1;
+      renderCommunity();
+      if (post.liked) showToast(`👍 Sent Kudos to ${post.author}!`, 'strava');
+    }
+    window.toggleKudos = toggleKudos;
+
+    function addFeedComment(postId) {
+      const inp = document.getElementById('commentInput_' + postId);
+      if (!inp || !inp.value.trim()) return;
+      const post = state.feed.find(p => p.id === postId);
+      if (!post) return;
+      post.comments.push({ user: state.athleteName, text: inp.value.trim() });
+      inp.value = '';
+      renderCommunity();
+      showToast('💬 Comment posted to Club Feed', 'lime');
+    }
+    window.addFeedComment = addFeedComment;
+
+    function toggleChallenge(chalId) {
+      const ch = state.challenges.find(c => c.id === chalId);
+      if (!ch) return;
+      ch.joined = !ch.joined;
+      renderCommunity();
+      showToast(ch.joined ? `🏆 Joined "${ch.name}"` : `Left "${ch.name}"`, 'lime');
+    }
+    window.toggleChallenge = toggleChallenge;
+
+    // AI Coach Presets
+    function generateAiAdvice(topic) {
+      const box = document.getElementById('aiCoachResponseBox');
+      if (!box) return;
+      if (topic === 'race') {
+        box.innerHTML = `
+          <p><strong class="text-utopia-lime">36-Hour Race Carb-Loading Protocol:</strong> Increase daily carbohydrate intake to <strong>8.5g/kg (580g/day)</strong> using low-residue sources (white jasmine rice, Maurten 320 drink mix, sourdough, maple syrup) while tapering training volume by 65%.</p>
+          <p><strong class="text-utopia-cyan">Hydration Pre-Load:</strong> Add 650mg sodium per liter of fluid starting 18 hours before gun time.</p>
+        `;
+      } else if (topic === 'recovery') {
+        box.innerHTML = `
+          <p><strong class="text-rose-400">Localized Soleus & Gastrocnemius Repair:</strong> Your calf readiness sits at <strong>62%</strong> due to high-cadence tempo running. Avoid steep uphill intervals for 24 hours.</p>
+          <p><strong class="text-emerald-400">Action Plan:</strong> Log 15g collagen + 50mg Vitamin C 45 minutes prior to 10 minutes of gentle ankle mobility and Z1 spin recovery.</p>
+        `;
+      } else {
+        box.innerHTML = `
+          <p><strong class="text-utopia-cyan">Power-to-Weight Optimization (Current: 4.55 W/kg):</strong> Maintain a mild <strong>-250 kcal net daily deficit</strong> on rest days while fueling 100% of Strava workout burn during threshold days so lean muscle mass and FTP (315W) remain protected.</p>
+        `;
+      }
+    }
+    window.generateAiAdvice = generateAiAdvice;
+
+    function selectPlan(planName) {
+      showToast(`💎 Selected ${planName} — Ready for instant deployment!`, 'lime');
+    }
+    window.selectPlan = selectPlan;
+
+    // Chart.js Initialization
+    let fluxChartInstance = null;
+    let sleepChartInstance = null;
+
+    function initCharts() {
+      if (typeof Chart === 'undefined') return;
+      const fluxCtx = document.getElementById('dashboardFluxChart')?.getContext('2d');
+      if (fluxCtx) {
+        fluxChartInstance = new Chart(fluxCtx, {
+          type: 'bar',
+          data: {
+            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Today'],
+            datasets: [
+              {
+                label: 'MyFitnessPal Intake (kcal)',
+                data: [2620, 2890, 2410, 3120, 2750, 3340, 2550],
+                backgroundColor: 'rgba(0, 240, 255, 0.7)',
+                borderRadius: 6
+              },
+              {
+                label: 'Strava Active Burn (kcal)',
+                data: [610, 840, 320, 1180, 520, 920, 740],
+                backgroundColor: 'rgba(252, 76, 2, 0.85)',
+                borderRadius: 6
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { labels: { color: '#94A3B8', font: { size: 11 } } }
+            },
+            scales: {
+              x: { ticks: { color: '#94A3B8' }, grid: { color: 'rgba(255,255,255,0.04)' } },
+              y: { ticks: { color: '#94A3B8' }, grid: { color: 'rgba(255,255,255,0.06)' } }
+            }
+          }
+        });
+      }
+
+      const sleepCtx = document.getElementById('sleepStageChart')?.getContext('2d');
+      if (sleepCtx) {
+        sleepChartInstance = new Chart(sleepCtx, {
+          type: 'line',
+          data: {
+            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Today'],
+            datasets: [
+              {
+                label: 'HRV (ms)',
+                data: [76, 72, 81, 69, 84, 82, 88],
+                borderColor: '#10B981',
+                backgroundColor: 'rgba(16, 185, 129, 0.18)',
+                fill: true,
+                tension: 0.35
+              },
+              {
+                label: 'Deep + REM Sleep (hrs x 10)',
+                data: [38, 35, 42, 34, 41, 44, 46],
+                borderColor: '#00F0FF',
+                backgroundColor: 'transparent',
+                tension: 0.35
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { labels: { color: '#94A3B8', font: { size: 11 } } }
+            },
+            scales: {
+              x: { ticks: { color: '#94A3B8' }, grid: { color: 'rgba(255,255,255,0.04)' } },
+              y: { ticks: { color: '#94A3B8' }, grid: { color: 'rgba(255,255,255,0.06)' } }
+            }
+          }
+        });
+      }
+    }
+
+    // Live Workout Recorder / Simulator
+    function formatSeconds(sec) {
+      const hrs = String(Math.floor(sec / 3600)).padStart(2, '0');
+      const mins = String(Math.floor((sec % 3600) / 60)).padStart(2, '0');
+      const s = String(sec % 60).padStart(2, '0');
+      return `${hrs}:${mins}:${s}`;
+    }
+
+    function toggleLiveSimulation() {
+      const btn = document.getElementById('liveStartPauseBtn');
+      if (!state.liveRec.running) {
+        state.liveRec.running = true;
+        btn.textContent = 'PAUSE';
+        if (state.liveRec.intervalId) clearInterval(state.liveRec.intervalId);
+        state.liveRec.intervalId = setInterval(() => {
+          state.liveRec.seconds += 1;
+          state.liveRec.distKm += 0.042;
+          state.liveRec.kcal += 1.4;
+          const simHr = Math.round(148 + Math.sin(state.liveRec.seconds / 4) * 14);
+          document.getElementById('liveTimerDisplay').textContent = formatSeconds(state.liveRec.seconds);
+          document.getElementById('liveDistDisplay').textContent = formatDist(state.liveRec.distKm);
+          document.getElementById('liveHrDisplay').textContent = simHr + ' bpm';
+          document.getElementById('headerLiveHr').textContent = simHr + ' BPM';
+          document.getElementById('liveKcalDisplay').textContent = Math.round(state.liveRec.kcal) + ' kcal';
+        }, 400);
+      } else {
+        state.liveRec.running = false;
+        btn.textContent = 'RESUME';
+        if (state.liveRec.intervalId) {
+          clearInterval(state.liveRec.intervalId);
+          state.liveRec.intervalId = null;
+        }
+      }
+    }
+
+    // Wire up all DOM Event Listeners on Load
+    window.addEventListener('DOMContentLoaded', () => {
+      // Nav tabs
+      document.querySelectorAll('.nav-tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const tab = btn.getAttribute('data-tab');
+          if (tab) switchTab(tab);
+        });
+      });
+
+      // Unit toggle
+      document.getElementById('unitToggleBtn').addEventListener('click', () => {
+        state.unitSystem = state.unitSystem === 'metric' ? 'imperial' : 'metric';
+        document.getElementById('unitLabel').textContent = state.unitSystem === 'metric' ? 'METRIC (KM / KG)' : 'IMPERIAL (MI / LB)';
+        computeTotals();
+        renderDashboardLists();
+        drawGpsCanvas();
+        update1RmCalc();
+        renderCommunity();
+        showToast(`Switched units to ${state.unitSystem.toUpperCase()}`, 'cyan');
+      });
+
+      // Theme toggle
+      document.getElementById('themeToggleBtn').addEventListener('click', () => {
+        state.lightMode = !state.lightMode;
+        document.documentElement.classList.toggle('light-mode', state.lightMode);
+        document.getElementById('themeLabel').textContent = state.lightMode ? '🌙 Dark' : '☀️ Light';
+        showToast(state.lightMode ? 'Switched to Daylight High-Contrast Mode' : 'Switched to Carbon Dark Mode', 'lime');
+      });
+
+      // Export JSON
+      document.getElementById('exportDataBtn').addEventListener('click', () => {
+        const payload = JSON.stringify({
+          athlete: state.athleteName,
+          exportedAt: new Date().toISOString(),
+          workouts: state.workouts,
+          meals: state.meals
+        }, null, 2);
+        const blob = new Blob([payload], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'utopia-fitness-telemetry.json';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        showToast('⬇ Exported Utopia Fitness Telemetry JSON', 'lime');
+      });
+
+      // Header Water Button
+      document.getElementById('headerWaterBtn').addEventListener('click', () => adjustWater(250));
+
+      // Quick Modals
+      document.getElementById('openQuickWorkoutBtn').addEventListener('click', () => openModal('workoutModal'));
+      document.getElementById('dashAddWorkoutBtn').addEventListener('click', () => openModal('workoutModal'));
+      document.getElementById('openQuickMealBtn').addEventListener('click', () => {
+        switchTab('nutrition');
+        openModal('scannerModal');
+      });
+      document.getElementById('openScannerModalBtn').addEventListener('click', () => openModal('scannerModal'));
+      document.getElementById('openAiCoachBtn').addEventListener('click', () => openModal('aiCoachModal'));
+      document.getElementById('openProfileModalBtn').addEventListener('click', () => openModal('profileModal'));
+
+      // Chart Mode Switcher
+      document.querySelectorAll('.chart-mode-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const mode = btn.getAttribute('data-chartmode');
+          document.querySelectorAll('.chart-mode-btn').forEach(b => {
+            b.className = 'chart-mode-btn px-2.5 py-1 rounded-lg sub-panel text-slate-300 font-semibold text-xs transition';
+          });
+          btn.className = 'chart-mode-btn px-2.5 py-1 rounded-lg bg-utopia-lime text-slate-950 font-bold text-xs transition';
+          if (!fluxChartInstance) return;
+          if (mode === 'strain') {
+            fluxChartInstance.data.datasets[0].label = 'Autonomic Readiness (%)';
+            fluxChartInstance.data.datasets[0].data = [84, 79, 88, 74, 90, 86, 92];
+            fluxChartInstance.data.datasets[1].label = 'Day Cardiovascular Strain (x5)';
+            fluxChartInstance.data.datasets[1].data = [72, 85, 55, 94, 68, 88, 82];
+          } else {
+            fluxChartInstance.data.datasets[0].label = 'MyFitnessPal Intake (kcal)';
+            fluxChartInstance.data.datasets[0].data = [2620, 2890, 2410, 3120, 2750, 3340, 2550];
+            fluxChartInstance.data.datasets[1].label = 'Strava Active Burn (kcal)';
+            fluxChartInstance.data.datasets[1].data = [610, 840, 320, 1180, 520, 920, 740];
+          }
+          fluxChartInstance.update();
+        });
+      });
+
+      // Route Selector & Scrubber
+      document.getElementById('routeSelector').addEventListener('change', (e) => {
+        state.selectedRouteIdx = parseInt(e.target.value, 10) || 0;
+        drawGpsCanvas();
+      });
+      document.getElementById('routeScrubber').addEventListener('input', (e) => {
+        state.scrubPercent = parseInt(e.target.value, 10) || 0;
+        drawGpsCanvas();
+      });
+
+      // Live Recorder Controls
+      document.getElementById('toggleLiveRecorderBtn').addEventListener('click', () => {
+        const panel = document.getElementById('liveRecorderPanel');
+        panel.classList.toggle('hidden');
+      });
+      document.getElementById('liveStartPauseBtn').addEventListener('click', toggleLiveSimulation);
+      document.getElementById('liveLapBtn').addEventListener('click', () => {
+        const lapNum = state.liveRec.laps.length + 1;
+        state.liveRec.laps.push(`Lap ${lapNum}: ${formatSeconds(state.liveRec.seconds)} • ${formatDist(state.liveRec.distKm)} • ${Math.round(state.liveRec.kcal)} kcal`);
+        document.getElementById('liveLapsContainer').innerHTML = state.liveRec.laps.map(l => `<div>🏁 ${l}</div>`).join('');
+      });
+      document.getElementById('liveFinishSaveBtn').addEventListener('click', () => {
+        if (state.liveRec.intervalId) {
+          clearInterval(state.liveRec.intervalId);
+          state.liveRec.intervalId = null;
+        }
+        state.liveRec.running = false;
+        const sport = document.getElementById('liveSportType').value;
+        const dist = Math.max(1.2, Number(state.liveRec.distKm.toFixed(2)));
+        const kcal = Math.max(140, Math.round(state.liveRec.kcal));
+        const dur = Math.max(8, Math.round(state.liveRec.seconds / 60));
+        state.workouts.unshift({
+          id: 'live_' + Date.now(),
+          title: `Live GPS ${sport} Session`,
+          type: sport,
+          distKm: dist,
+          durMin: dur,
+          elevM: 64,
+          kcal: kcal,
+          date: 'Today, Just Now',
+          pace: '4:15 /km',
+          hr: 162
+        });
+        state.liveRec.seconds = 0;
+        state.liveRec.distKm = 0;
+        state.liveRec.kcal = 0;
+        state.liveRec.laps = [];
+        document.getElementById('liveTimerDisplay').textContent = '00:00:00';
+        document.getElementById('liveDistDisplay').textContent = '0.00 km';
+        document.getElementById('liveKcalDisplay').textContent = '0 kcal';
+        document.getElementById('liveLapsContainer').innerHTML = '';
+        document.getElementById('liveStartPauseBtn').textContent = 'START';
+        document.getElementById('liveRecorderPanel').classList.add('hidden');
+        computeTotals();
+        renderDashboardLists();
+        showToast(`⚡ Saved Live GPS ${sport} (+${kcal} kcal credited to MyFitnessPal!)`, 'strava');
+      });
+
+      // Segment Filters
+      document.querySelectorAll('.seg-filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.segmentFilter = btn.getAttribute('data-segfilter');
+          document.querySelectorAll('.seg-filter-btn').forEach(b => {
+            b.className = 'seg-filter-btn px-3 py-1 rounded-lg sub-panel text-xs font-semibold';
+          });
+          btn.className = 'seg-filter-btn px-3 py-1 rounded-lg bg-utopia-strava text-white text-xs font-bold';
+          renderSegments();
+        });
+      });
+
+      // Macro Preset Selector
+      document.getElementById('macroPresetSelect').addEventListener('change', (e) => {
+        const val = e.target.value;
+        if (val === 'endurance') { state.proGoal = 175; state.carbGoal = 370; state.fatGoal = 75; }
+        else if (val === 'hypertrophy') { state.proGoal = 220; state.carbGoal = 310; state.fatGoal = 80; }
+        else { state.proGoal = 230; state.carbGoal = 140; state.fatGoal = 125; }
+        computeTotals();
+        showToast(`Updated Macro Split Preset: ${val.toUpperCase()}`, 'cyan');
+      });
+
+      // Food Search & Custom Food Form
+      document.getElementById('foodSearchInput').addEventListener('input', renderNutritionView);
+      document.getElementById('customFoodForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const name = document.getElementById('customFoodName').value.trim();
+        const slot = document.getElementById('customFoodSlot').value;
+        const kcal = parseInt(document.getElementById('customFoodKcal').value, 10) || 0;
+        const pro = parseInt(document.getElementById('customFoodPro').value, 10) || 0;
+        const carb = parseInt(document.getElementById('customFoodCarb').value, 10) || 0;
+        const fat = parseInt(document.getElementById('customFoodFat').value, 10) || 0;
+        if (!name) return;
+        state.meals.push({ id: 'cust_' + Date.now(), slot, name, kcal, pro, carb, fat });
+        document.getElementById('customFoodName').value = '';
+        computeTotals();
+        renderDashboardLists();
+        renderNutritionView();
+        showToast(`🥗 Added "${name}" (${kcal} kcal) to ${slot}`, 'cyan');
+      });
+
+      // Log Workout Modal Form
+      document.getElementById('logWorkoutForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const title = document.getElementById('woTitle').value.trim() || 'GPS Workout';
+        const type = document.getElementById('woType').value;
+        const distKm = parseFloat(document.getElementById('woDist').value) || 0;
+        const durMin = parseInt(document.getElementById('woDur').value, 10) || 30;
+        const elevM = parseInt(document.getElementById('woElev').value, 10) || 0;
+        const kcal = parseInt(document.getElementById('woKcal').value, 10) || 300;
+        state.workouts.unshift({
+          id: 'wo_' + Date.now(),
+          title,
+          type,
+          distKm,
+          durMin,
+          elevM,
+          kcal,
+          date: 'Today, Logged',
+          pace: distKm > 0 ? `${(durMin / distKm).toFixed(2)} /km` : '145 bpm',
+          hr: 158
+        });
+        closeModal('workoutModal');
+        computeTotals();
+        renderDashboardLists();
+        showToast(`⚡ Logged "${title}" (+${kcal} kcal added to daily allowance!)`, 'strava');
+      });
+
+      // SVG Muscle Click Listeners
+      document.querySelectorAll('.muscle-node').forEach(node => {
+        node.addEventListener('click', () => {
+          const m = node.getAttribute('data-muscle');
+          if (m) selectMuscle(m);
+        });
+      });
+
+      // 1RM Calculator Listeners
+      document.getElementById('calcWeightInput').addEventListener('input', update1RmCalc);
+      document.getElementById('calcRepsInput').addEventListener('input', update1RmCalc);
+
+      // Post Status in Community
+      document.getElementById('shareStatusBtn').addEventListener('click', () => {
+        state.feed.unshift({
+          id: 'f_' + Date.now(),
+          author: state.athleteName,
+          initials: 'AM',
+          badge: 'UTOPIA PRO',
+          time: 'Just now',
+          title: `Synced ${state.workouts[0].title} + Hit ${state.meals.reduce((a,b)=>a+b.pro,0)}g Protein Target!`,
+          stats: `${formatDist(state.workouts[0].distKm)} • +${state.workouts[0].kcal} kcal Strava Burn • 92% Readiness`,
+          kudos: 1,
+          liked: true,
+          comments: []
+        });
+        renderCommunity();
+        showToast('🚀 Posted activity & nutrition milestone to Club Feed!', 'lime');
+      });
+
+      // Billing Toggle in Platform View
+      document.getElementById('billMonthlyBtn').addEventListener('click', () => {
+        document.getElementById('proPriceVal').textContent = '$11.99';
+        document.getElementById('teamPriceVal').textContent = '$29.99';
+        document.getElementById('billMonthlyBtn').className = 'px-3 py-1.5 rounded-lg bg-utopia-lime text-slate-950 font-bold text-xs';
+        document.getElementById('billAnnualBtn').className = 'px-3 py-1.5 rounded-lg text-slate-300 font-bold text-xs';
+      });
+      document.getElementById('billAnnualBtn').addEventListener('click', () => {
+        document.getElementById('proPriceVal').textContent = '$8.99';
+        document.getElementById('teamPriceVal').textContent = '$22.49';
+        document.getElementById('billAnnualBtn').className = 'px-3 py-1.5 rounded-lg bg-utopia-lime text-slate-950 font-bold text-xs';
+        document.getElementById('billMonthlyBtn').className = 'px-3 py-1.5 rounded-lg text-slate-300 font-bold text-xs';
+      });
+
+      // Athlete Profile Form
+      document.getElementById('profileForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        state.athleteName = document.getElementById('profNameInput').value.trim() || 'Aarav Mehta';
+        state.baseGoalKcal = parseInt(document.getElementById('profBaseKcalInput').value, 10) || 2450;
+        state.weeklyGoalKm = parseInt(document.getElementById('profWeeklyDistInput').value, 10) || 100;
+        document.getElementById('sidebarAthleteName').textContent = state.athleteName;
+        closeModal('profileModal');
+        computeTotals();
+        renderCommunity();
+        showToast('✔ Saved Athlete Profile & Metabolic Targets', 'lime');
+      });
+
+      // Window Resize Redraw for GPS Canvas
+      window.addEventListener('resize', () => {
+        if (!document.getElementById('view-strava').classList.contains('hidden')) {
+          drawGpsCanvas();
+        }
+      });
+
+      // Initial Render
+      computeTotals();
+      renderDashboardLists();
+      renderNutritionView();
+      renderSegments();
+      update1RmCalc();
+      renderCommunity();
+      initCharts();
+      drawGpsCanvas();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://utopia-fitness.netlify.app/sitemap.xml
